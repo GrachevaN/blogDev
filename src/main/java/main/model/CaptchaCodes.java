@@ -4,7 +4,6 @@ package main.model;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
-import java.util.Date;
 
 @Entity
 @Table(name = "captcha_codes")
@@ -15,12 +14,7 @@ public class CaptchaCodes {
     private int id;
 
     @NotNull
-    private Timestamp theTime;
-
-//    java.util.Date date = new Date();
-//    Object param = new java.sql.Timestamp(date.getTime());
-//// The JDBC driver knows what to do with a java.sql type:
-//    preparedStatement.setObject(param);
+    private Timestamp time;
 
 
     @NotNull
@@ -38,12 +32,12 @@ public class CaptchaCodes {
         this.id = id;
     }
 
-    public Timestamp getTheTime() {
-        return theTime;
+    public Timestamp getTime() {
+        return time;
     }
 
-    public void setTheTime(Timestamp theTime) {
-        this.theTime = theTime;
+    public void setTime(Timestamp theTime) {
+        this.time = theTime;
     }
 
     public String getCode() {

@@ -15,13 +15,15 @@ public class Votes {
     private int id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
     private User user;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
     private Post post;
 
     @NotNull
-    @Column(name = "vote_time")
+    @Column(name = "time")
     private Timestamp voteTime;
 
     @NotNull

@@ -33,6 +33,7 @@ public class Post {
     private String title;
 
     @NotNull
+    @Column(name = "text")
     private String textContent;
 
     @Column(name = "view_count")

@@ -2,6 +2,7 @@ package main.model;
 
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 
 @Entity
 @Table(name = "tag2post")
@@ -13,9 +14,11 @@ public class Tag2Post {
     private int id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
     private Post post;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @NotNull
     private Tag tag;
 
     public int getId() {

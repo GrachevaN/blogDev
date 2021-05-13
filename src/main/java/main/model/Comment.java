@@ -15,7 +15,7 @@ public class Comment {
     private int id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Comment parentComment;
+    private Comment parent;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @NotNull
@@ -26,7 +26,8 @@ public class Comment {
     private User user;
 
     @NotNull
-    private Timestamp theTime;
+    @Column(name = "time")
+    private Timestamp commentPostTime;
 
     @NotNull
     private String text;
@@ -40,12 +41,12 @@ public class Comment {
         this.id = id;
     }
 
-    public Comment getParentComment() {
-        return parentComment;
+    public Comment getParent() {
+        return parent;
     }
 
-    public void setParentComment(Comment parentComment) {
-        this.parentComment = parentComment;
+    public void setParent(Comment parentComment) {
+        this.parent = parentComment;
     }
 
     public Post getPost() {
@@ -64,12 +65,12 @@ public class Comment {
         this.user = user;
     }
 
-    public Timestamp getTheTime() {
-        return theTime;
+    public Timestamp getCommentPostTime() {
+        return commentPostTime;
     }
 
-    public void setTheTime(Timestamp theTime) {
-        this.theTime = theTime;
+    public void setCommentPostTime(Timestamp theTime) {
+        this.commentPostTime = theTime;
     }
 
     public String getText() {
