@@ -13,15 +13,13 @@ public class CaptchaCodes {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotNull
+    @Column(nullable = false)
     private Timestamp time;
 
-
-    @NotNull
+    @Column(nullable = false)
     private String code;
 
-    @NotNull
-    @Column(name = "secret_code")
+    @Column(name = "secret_code", nullable = false, columnDefinition = "tinytext")
     private String secretCode;
 
     public int getId() {

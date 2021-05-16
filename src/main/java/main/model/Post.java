@@ -13,33 +13,28 @@ public class Post {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @NotNull
-    @Column(name = "is_active")
+    @Column(name = "is_active", nullable = false)
     private byte status;
 
     @Enumerated (EnumType.STRING)
-//    @Column(columnDefinition = "enum")
-    @NotNull
+//    @Column(columnDefinition = "enum", nullable = false)
+    @Column(nullable = false)
     private ModerationStatus moderationStatus = ModerationStatus.NEW;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User moderator;
 
-    @NotNull
-    @Column(name = "post_time")
+    @Column(name = "post_time", nullable = false)
     private Timestamp postTime;
 
     @NotNull
     private String title;
 
-    @NotNull
-    @Column(name = "text")
+    @Column(nullable = false, name = "text", columnDefinition = "text")
     private String textContent;
 
-    @Column(name = "view_count")
-    @NotNull
+    @Column(name = "view_count", nullable = false)
     private int viewCount;
-
 
     public int getId() {
         return id;

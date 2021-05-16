@@ -18,8 +18,7 @@ public class User {
     @NotNull
     private byte is_moderator;
 
-    @Column(name = "reg_time")
-    @NotNull
+    @Column(name = "reg_time", nullable = false)
     private Timestamp registrationTime;
 
     @NotNull
@@ -33,6 +32,7 @@ public class User {
 
     private String code;
 
+    @Column(columnDefinition = "text")
     private String photo;
 
     public int getId() {

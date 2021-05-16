@@ -1,0 +1,605 @@
+databaseChangeLog:
+  - logicalFilePath: db/changelog/db.changelog-master.yaml
+  - changeSet:
+      id: 1
+      author: natalie
+      changes:
+        - createTable:
+            tableName: users
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: password
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: reg_time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: email
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_moderator
+                  type: TINYINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(255)
+              - column:
+                  name: photo
+                  type: text
+        - createTable:
+            tableName: posts
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: TINYINT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: moderation_status
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: moderator_id
+                  type: INT
+                  constraints:
+                    nullable: true
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: title
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: text
+                  type: text
+                  constraints:
+                    nullable: false
+              - column:
+                  name: view_count
+                  type: INT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: posts
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: posts_user_id
+#            constraintName: user_id
+        - addForeignKeyConstraint:
+            baseTableName: posts
+            baseColumnNames: moderator_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: posts_moderator_id
+        #            constraintName: user_id
+        - createTable:
+            tableName: post_votes
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: TINYINT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: post_votes
+            baseColumnNames: user_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: postvotes_user_id
+        - addForeignKeyConstraint:
+            baseTableName: post_votes
+            baseColumnNames: post_id
+            referencedTableName: posts
+            referencedColumnNames: id
+            constraintName: postvotes_post_id
+        - createTable:
+            tableName: tags
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: tag2post
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: tag_id
+                  type: INT
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: tag2post
+            baseColumnNames: post_id
+            referencedTableName: posts
+            referencedColumnNames: id
+            constraintName: tag2post_post_id
+        - addForeignKeyConstraint:
+            baseTableName: tag2post
+            baseColumnNames: tag_id
+            referencedTableName: tags
+            referencedColumnNames: id
+            constraintName: tag2post_tag_id
+        - createTable:
+            tableName: captcha_codes
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: TINYTEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: secret_code
+                  type: TINYTEXT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: global_settings
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: code
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: value
+                  type: varchar(255)
+                  constraints:
+                    nullable: false
+        - createTable:
+            tableName: post_comments
+            columns:
+              - column:
+                  name: id
+                  type: INT
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+              - column:
+                  name: post_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: parent_id
+                  type: INT
+              - column:
+                  name: user_id
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: time
+                  type: DATETIME
+                  constraints:
+                    nullable: false
+              - column:
+                  name: text
+                  type: text
+                  constraints:
+                    nullable: false
+              - addForeignKeyConstraint:
+                  baseTableName: post_comments
+                  baseColumnNames: user_id
+                  referencedTableName: users
+                  referencedColumnNames: id
+                  constraintName: comments_user_id
+              - addForeignKeyConstraint:
+                  baseTableName: post_comments
+                  baseColumnNames: post_id
+                  referencedTableName: posts
+                  referencedColumnNames: id
+                  constraintName: comments_post_id
+              - addForeignKeyConstraint:
+                  baseTableName: post_comments
+                  baseColumnNames: parent_id
+                  referencedTableName: post_comments
+                  referencedColumnNames: id
+                  constraintName: comments_parent_id
+
+
+  - changeSet:
+      id: 2
+      author: natalie
+      comment: "Add test data"
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: name
+                  value: "vasya"
+              - column:
+                  name: password
+                  value: "1234"
+              - column:
+                  name: email
+                  value: "admin@server.com"
+              - column:
+                  name: is_moderator
+                  value: 1
+              - column:
+                  name: reg_time
+                  value: '2019-10-04 08:23:45'
+              - column:
+                  name: code
+                  value: "1sfa"
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: name
+                  value: "petr"
+              - column:
+                  name: password
+                  value: "12345"
+              - column:
+                  name: email
+                  value: "petr@mail.com"
+              - column:
+                  name: is_moderator
+                  value: 0
+              - column:
+                  name: reg_time
+                  value: '2019-10-12 18:23:45'
+              - column:
+                  name: code
+                  value: "1sf2fa"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "NEW"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2020-04-12 22:15:05'
+              - column:
+                  name: title
+                  value: "title1"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "my post is the first one"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "NEW"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2020-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title2"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "my post is the second one"
+        - insert:
+            tableName: post_votes
+            columns:
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2020-05-12 22:15:05'
+              - column:
+                  name: value
+                  value: 1
+        - insert:
+            tableName: post_votes
+            columns:
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2020-06-12 22:15:05'
+              - column:
+                  name: value
+                  value: 1
+        - insert:
+            tableName: post_votes
+            columns:
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: post_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2020-07-12 22:15:05'
+              - column:
+                  name: value
+                  value: 1
+        - insert:
+            tableName: tags
+            columns:
+              - column:
+                  name: name
+                  value: "IT"
+        - insert:
+            tableName: tags
+            columns:
+              - column:
+                  name: name
+                  value: "learning"
+        - insert:
+            tableName: tags
+            columns:
+              - column:
+                  name: name
+                  value: "computers"
+        - insert:
+            tableName: tag2post
+            columns:
+              - column:
+                  name: tag_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 1
+        - insert:
+            tableName: tag2post
+            columns:
+              - column:
+                  name: tag_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 2
+        - insert:
+            tableName: tag2post
+            columns:
+              - column:
+                  name: tag_id
+                  value: 2
+              - column:
+                  name: post_id
+                  value: 1
+        - insert:
+            tableName: tag2post
+            columns:
+              - column:
+                  name: tag_id
+                  value: 3
+              - column:
+                  name: post_id
+                  value: 2
+        - insert:
+            tableName: post_comments
+            columns:
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2020-05-12 22:18:15'
+              - column:
+                  name: text
+                  value: "hello. this is first comment"
+        - insert:
+            tableName: post_comments
+            columns:
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: post_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2020-05-02 22:18:15'
+              - column:
+                  name: text
+                  value: "hello. this is second post comment"
+        - insert:
+            tableName: post_comments
+            columns:
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: post_id
+                  value: 1
+              - column:
+                  name: parent_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2020-09-12 22:18:15'
+              - column:
+                  name: text
+                  value: "hello. this is first post second comment"
+        - insert:
+            tableName: captcha_codes
+            columns:
+              - column:
+                  name: code
+                  value: "123"
+              - column:
+                  name: secret_code
+                  value: "777"
+              - column:
+                  name: time
+                  value: '2020-05-12 22:15:05'
+        - insert:
+            tableName: captcha_codes
+            columns:
+              - column:
+                  name: code
+                  value: "234"
+              - column:
+                  name: secret_code
+                  value: "jknkwef"
+              - column:
+                  name: time
+                  value: '2020-05-10 22:15:05'
+        - insert:
+            tableName: global_settings
+            columns:
+              - column:
+                  name: code
+                  value: "MULTIUSER_MODE"
+              - column:
+                  name: name
+                  value: "Многопользовательский режим"
+              - column:
+                  name: value
+                  value: "NO"
+        - insert:
+            tableName: global_settings
+            columns:
+              - column:
+                  name: code
+                  value: "POST_PREMODERATION"
+              - column:
+                  name: name
+                  value: "Премодерация постов"
+              - column:
+                  name: value
+                  value: "NO"
+        - insert:
+            tableName: global_settings
+            columns:
+              - column:
+                  name: code
+                  value: "STATISTICS_IS_PUBLIC"
+              - column:
+                  name: name
+                  value: "Показывать всем статистику блога"
+              - column:
+                  name: value
+                  value: "NO"

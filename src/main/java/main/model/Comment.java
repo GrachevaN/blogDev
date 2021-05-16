@@ -25,11 +25,10 @@ public class Comment {
     @NotNull
     private User user;
 
-    @NotNull
-    @Column(name = "time")
+    @Column(name = "time", nullable = false)
     private Timestamp commentPostTime;
 
-    @NotNull
+    @Column(nullable = false, columnDefinition = "text")
     private String text;
 
 

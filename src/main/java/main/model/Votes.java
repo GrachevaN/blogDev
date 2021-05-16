@@ -22,8 +22,7 @@ public class Votes {
     @NotNull
     private Post post;
 
-    @NotNull
-    @Column(name = "time")
+    @Column(name = "time", nullable = false)
     private Timestamp voteTime;
 
     @NotNull
