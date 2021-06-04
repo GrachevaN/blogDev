@@ -4,5 +4,14 @@ spring.datasource.username: root
 spring.datasource.password: 12345
 spring.jpa.hibernate.ddl-auto: none
 spring.jpa.database-platform: org.hibernate.dialect.MySQL8Dialect
-#liquibase.change-log.classpath: liquibase-changeLog.xml
-liquibase.change-log=classpath: db/liquibase-changelog.xml
+spring.jpa.show-sql: false
+spring.liquibase.enabled: false
+
+
+
+blog.title: DevPub
+blog.subtitle: Рассказы разработчиков
+blog.phone: +7(903)666-44-55
+blog.email: mail@mail.ru
+blog.copyright: Дмитрий Сергеев
+blog.copyrightFrom: 2005

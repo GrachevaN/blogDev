@@ -1,6 +1,10 @@
 package main.model;
 
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonRootName;
+
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.sql.Timestamp;
@@ -8,6 +12,7 @@ import java.util.Date;
 
 @Entity
 @Table(name = "users")
+@JsonRootName(value = "user")
 public class User {
 
 
@@ -16,9 +21,11 @@ public class User {
     private int id;
 
     @NotNull
+    @JsonProperty("moderation")
     private byte is_moderator;
 
     @Column(name = "reg_time", nullable = false)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd-MM-yyyy hh:mm:ss")
     private Timestamp registrationTime;
 
     @NotNull
@@ -34,6 +41,21 @@ public class User {
 
     @Column(columnDefinition = "text")
     private String photo;
+
+    @Transient
+    private long moderationCount;
+
+    public long getModerationCount() {
+        return moderationCount;
+    }
+
+    public void setModerationCount(long moderationCount) {
+        this.moderationCount = moderationCount;
+    }
+
+    public byte getIs_moderator() {
+        return is_moderator;
+    }
 
     public int getId() {
         return id;

@@ -62,7 +62,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: moderation_status
-                  type: varchar(255)
+                  type: enum ('NEW', 'ACCEPTED', 'DECLINED')
                   constraints:
                     nullable: false
               - column:
@@ -101,14 +101,12 @@ databaseChangeLog:
             referencedTableName: users
             referencedColumnNames: id
             constraintName: posts_user_id
-#            constraintName: user_id
         - addForeignKeyConstraint:
             baseTableName: posts
             baseColumnNames: moderator_id
             referencedTableName: users
             referencedColumnNames: id
             constraintName: posts_moderator_id
-        #            constraintName: user_id
         - createTable:
             tableName: post_votes
             columns:
@@ -353,7 +351,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: moderation_status
-                  value: "NEW"
+                  value: 'NEW'
               - column:
                   name: is_active
                   value: 1

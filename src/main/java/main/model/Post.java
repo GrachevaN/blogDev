@@ -17,14 +17,17 @@ public class Post {
     private byte status;
 
     @Enumerated (EnumType.STRING)
-//    @Column(columnDefinition = "enum", nullable = false)
-    @Column(nullable = false)
+    @Column(columnDefinition = "enum", nullable = false)
+//    @Column(nullable = false)
     private ModerationStatus moderationStatus = ModerationStatus.NEW;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private User moderator;
 
-    @Column(name = "post_time", nullable = false)
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private User user;
+
+    @Column(name = "time", nullable = false)
     private Timestamp postTime;
 
     @NotNull
@@ -35,6 +38,22 @@ public class Post {
 
     @Column(name = "view_count", nullable = false)
     private int viewCount;
+
+    public User getModerator() {
+        return moderator;
+    }
+
+    public void setModerator(User moderator) {
+        this.moderator = moderator;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
 
     public int getId() {
         return id;
@@ -52,7 +71,7 @@ public class Post {
         this.status = status;
     }
 
-        public ModerationStatus getModerationStatus() {
+    public ModerationStatus getModerationStatus() {
         return moderationStatus;
     }
 
