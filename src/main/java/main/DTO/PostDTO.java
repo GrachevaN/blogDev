@@ -1,34 +1,48 @@
 package main.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import main.model.User;
 
 import java.sql.Timestamp;
 
-public class PostDTO implements Comparable<PostDTO>{
+@JsonSerialize
+public class PostDTO {
 
+    @JsonProperty("id")
     private int id;
-    private Timestamp timestamp;
-    @JsonIgnore
-    private User user;
+
+    @JsonProperty("timestamp")
+    private long timestamp;
+
+
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private UserDTO user;
+
+    @JsonProperty("title")
     private String title;
+
+    @JsonProperty("announce")
     private String announce;
+    @JsonProperty("likeCount")
     private long likeCount;
+    @JsonProperty("dislikeCount")
     private long dislikeCount;
+    @JsonProperty("viewCount")
     private int viewCount;
+    @JsonProperty("commentCount")
     private long commentCount;
-    private String mode;
 
 
-    public PostDTO(int id, Timestamp timestamp, User user, String title, String mode)  {
+    public PostDTO(int id, Timestamp timestamp, UserDTO user, String title)  {
         this.id = id;
-        this.timestamp = timestamp;
+        this.timestamp = timestamp.getTime();
         this.user = user;
         this.title = title;
-        this.mode = mode;
     }
-
-
 
 
     public int getId() {
@@ -39,19 +53,19 @@ public class PostDTO implements Comparable<PostDTO>{
         this.id = id;
     }
 
-    public Timestamp getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(Timestamp timestamp) {
+    public void setTimestamp(long timestamp) {
         this.timestamp = timestamp;
     }
 
-    public User getUser() {
+    public UserDTO getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserDTO user) {
         this.user = user;
     }
 
@@ -103,21 +117,4 @@ public class PostDTO implements Comparable<PostDTO>{
         this.commentCount = commentCount;
     }
 
-    @Override
-    public int compareTo(PostDTO postDTO) {
-
-        switch (mode) {
-            case ("recent"):
-                return this.getTimestamp().compareTo(this.getTimestamp());
-            case ("popular"):
-                return (int) (postDTO.getCommentCount() - this.getCommentCount());
-            case ("best"):
-                return (int) (postDTO.getLikeCount() - this.getLikeCount());
-            case ("early"):
-                return postDTO.getTimestamp().compareTo(this.getTimestamp());
-        }
-
-
-        return 0;
-    }
 }

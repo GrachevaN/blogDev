@@ -3,6 +3,7 @@ package main.service;
 
 import main.DTO.TagDTO;
 import main.api.response.ApiGetTagsResponse;
+import main.model.ModerationStatus;
 import main.model.Post;
 import main.model.Tag;
 import main.repository.PostRepository;
@@ -23,8 +24,6 @@ public class ApiTagsService {
     @Autowired
     private TagsRepository tagsRepository;
 
-    @Autowired
-    private Tag2PostRepository tag2PostRepository;
 
     @Autowired
     private PostRepository postRepository;
@@ -37,15 +36,13 @@ public class ApiTagsService {
 
         List<Tag> allTags = tagsRepository.findAll();
         posts = posts.stream().filter(x -> x.getStatus()==1
-                && x.getModerationStatus().toString() == "ACCEPTED"
+                && x.getModerationStatus().equals(ModerationStatus.NEW)
                 && x.getPostTime().before((calendar.getTime())))
                 .collect(Collectors.toList());
         long postCount = posts.size();
         List<Tag> searchedTags;
         if (!tagName.equals("")) {
-            System.out.println(tagName);
             searchedTags = tagsRepository.findTagsByNameContaining(tagName);
-            System.out.println(searchedTags);
         }
         else{
             searchedTags = tags;

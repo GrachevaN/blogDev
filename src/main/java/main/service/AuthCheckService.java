@@ -4,6 +4,7 @@ package main.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import main.DTO.UserDTO;
 import main.api.response.AuthCheckResponse;
 import main.model.ModerationStatus;
 import main.model.User;
@@ -35,11 +36,12 @@ public class AuthCheckService {
 //            Optional<User> optionalUser = userRepository.findById(1);
             if (optionalUser.isPresent()) {
                 User user = optionalUser.get();
-
                 long moderationPostCount = postRepository.findAll().stream().filter(x -> x.getModerationStatus() == ModerationStatus.NEW).count();
                 long moderationCount = (user.getIs_moderator() == 1) ? moderationPostCount : 0;
-                user.setModerationCount(moderationCount);
-                authCheckResponse.setUser(user);
+                UserDTO userDTO = new UserDTO(user.getId(), user.getName(), user.getPhoto(), user.getEmail(), user.getIs_moderator());
+
+                userDTO.setModerationCount(moderationCount);
+                authCheckResponse.setUser(userDTO);
             }
         }
         return authCheckResponse;
