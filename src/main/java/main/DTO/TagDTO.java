@@ -1,11 +1,13 @@
 package main.DTO;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class TagDTO {
 
     private String name;
 
+//    @JsonProperty(value = "weight", defaultValue = "x")
     private double weight;
 
     public String getName() {

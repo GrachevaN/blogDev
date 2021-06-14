@@ -1,5 +1,6 @@
 package main.repository;
 
+import main.model.Post;
 import main.model.Tag;
 import main.model.Tag2Post;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,4 +18,5 @@ public interface Tag2PostRepository extends JpaRepository <Tag2Post, Integer> {
     List<Tag2Post> findAllByPostsCount();
 
 
+    List<Tag2Post> findByPost(Post post);
 }

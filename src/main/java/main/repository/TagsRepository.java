@@ -15,6 +15,8 @@ public interface TagsRepository extends JpaRepository <Tag, Integer> {
 
     @Query(value = "SELECT o from Tag o JOIN fetch Tag2Post t on o = t.tag where o.name LIKE :tagName%")
     List<Tag> findTagsByNameContaining(String tagName);
+
+
 //    @Query(value = "SELECT o from Tag o JOIN fetch Tag2Post t on o = t.tag where o.name LIKE :name%")
 //    List<Tag> findTagsByNameContaining(@Param("name") String name);
 }

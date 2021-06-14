@@ -1,22 +1,18 @@
 package main.repository;
 
+import main.model.CaptchaCodes;
 import main.model.Post;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface PostRepository extends JpaRepository <Post, Integer> {
 
 
-//    select posts.id
-//#, count(post_id) as posts_count
-//    from posts
-//    join post_comments on posts.id = post_comments.post_id
-//    group by posts.id
-//    order by count(post_id) desc
 
     @Query(value = "select o from Post o " +
             "join fetch Comment c on c.post = o " +
@@ -37,7 +33,23 @@ public interface PostRepository extends JpaRepository <Post, Integer> {
     @Query(value = "select p from Post p order by (p.postTime)")
     Page<Post> findAllOrderByPostTime(Pageable pageable);
 
-//    Page<Post> findAllOrderByPostTime(Pageable pageable);
+
+    @Query(value = "select p from Post p where p.textContent LIKE %:queryText%")
+    Page<Post> findAllByTextContent(Pageable pageable, String queryText);
+
+    Page<Post> findByTitleContaining(Pageable pageable, String queryText);
+
+    Page<Post> findByTextContentContaining(Pageable pageable, String queryText);
+
+    @Query(value = "select p from Post p where p.postTime between :postTime and :stopTime")
+//    WHERE datetime BETWEEN '2015-01-01' AND '2015-01-01 23:59:59'
+    Page<Post> findPostByPostTimeContaining(Pageable pageable, Timestamp postTime, Timestamp stopTime);
+
+//    Page<Post> findPostByPostTimeBefore(Pageable pageable, Timestamp time);
+
+    @Query(value = "select p from Post p join fetch Tag2Post t on t.post = p where t.tag.name = :tagName")
+    Page<Post> findAllByTag(Pageable pageable, String tagName);
+
 
 
 }

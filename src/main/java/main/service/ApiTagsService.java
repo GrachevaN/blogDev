@@ -36,7 +36,7 @@ public class ApiTagsService {
 
         List<Tag> allTags = tagsRepository.findAll();
         posts = posts.stream().filter(x -> x.getStatus()==1
-                && x.getModerationStatus().equals(ModerationStatus.NEW)
+                && x.getModerationStatus().equals(ModerationStatus.ACCEPTED)
                 && x.getPostTime().before((calendar.getTime())))
                 .collect(Collectors.toList());
         long postCount = posts.size();

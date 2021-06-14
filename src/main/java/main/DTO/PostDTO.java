@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import main.model.User;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 @JsonSerialize
 public class PostDTO {
@@ -36,6 +37,12 @@ public class PostDTO {
     @JsonProperty("commentCount")
     private long commentCount;
 
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<CommentDTO> comments;
+
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private List<String> tags;
+
 
     public PostDTO(int id, Timestamp timestamp, UserDTO user, String title)  {
         this.id = id;
@@ -44,6 +51,21 @@ public class PostDTO {
         this.title = title;
     }
 
+    public List<CommentDTO> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<CommentDTO> comments) {
+        this.comments = comments;
+    }
+
+    public List<String> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<String> tags) {
+        this.tags = tags;
+    }
 
     public int getId() {
         return id;

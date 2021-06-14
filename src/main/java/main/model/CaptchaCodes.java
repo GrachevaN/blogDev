@@ -16,7 +16,7 @@ public class CaptchaCodes {
     @Column(nullable = false)
     private Timestamp time;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "tinytext")
     private String code;
 
     @Column(name = "secret_code", nullable = false, columnDefinition = "tinytext")

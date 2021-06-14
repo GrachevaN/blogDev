@@ -8,9 +8,9 @@ public class UserDTO {
 
     @JsonProperty("id")
     private int id;
-    @JsonProperty("name")
+    @JsonProperty
     private String name;
-    @JsonProperty("photo")
+    @JsonProperty
     private String photo;
     @JsonProperty("email")
     private String email;
