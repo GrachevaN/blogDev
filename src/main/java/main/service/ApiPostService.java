@@ -212,7 +212,7 @@ public class ApiPostService {
         ApiPostResponse apiPostResponse = new ApiPostResponse();
         Calendar calendar = Calendar.getInstance();
         posts = posts.stream().filter(x -> x.getStatus()==1
-                && x.getModerationStatus().equals(ModerationStatus.NEW)
+                && x.getModerationStatus().equals(ModerationStatus.ACCEPTED)
                 && x.getPostTime().before((calendar.getTime())))
                 .collect(Collectors.toList());
 
