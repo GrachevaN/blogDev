@@ -60,7 +60,7 @@ public class ApiPostController {
     public ResponseEntity<?> getPostByTag (
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
-            , @RequestParam String tag
+            , @RequestParam (defaultValue = "") String tag
     ) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
         return apiPostService.getPostsByTag(pageable, tag);

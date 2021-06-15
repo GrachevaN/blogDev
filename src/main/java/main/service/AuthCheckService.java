@@ -21,8 +21,11 @@ import javax.imageio.ImageIO;
 import javax.servlet.http.HttpSession;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class AuthCheckService {
@@ -81,11 +84,9 @@ public class AuthCheckService {
         AuthCaptchaResponse authCaptchaResponse = new AuthCaptchaResponse();
         Cage cage = new GCage();
 
-
-        OutputStream os = null;
-//        try {
-//            os = new FileOutputStream("src/main/resources/captcha.jpg", false);
-        byte[] fileContent = cage.draw(cage.getTokenGenerator().next());
+        String captcha = generateCode();
+        byte[] fileContent = cage.draw(captcha);
+//        byte[] fileContent = cage.draw(cage.getTokenGenerator().next());
         ByteArrayInputStream bais = new ByteArrayInputStream(fileContent);
         BufferedImage image = ImageIO.read(bais);
         image = Scalr.resize(image, captchaWidth, captchaHeight);
@@ -99,7 +100,7 @@ public class AuthCheckService {
         UUID uuid1 = UUID.randomUUID();
         authCaptchaResponse.setSecret(String.valueOf(uuid1));
 
-        addNewCaptcha(String.valueOf(uuid1), encodedString);
+        addNewCaptcha(String.valueOf(uuid1), captcha);
         checkOldCaptcha();
 
         return authCaptchaResponse;
@@ -134,14 +135,34 @@ public class AuthCheckService {
         return addingNewUserResponse;
     }
 
-    private void checkCaptcha () {
-//        captchaRepository
+
+    private String generateCode () {
+        int length = 6;
+
+        String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+        SecureRandom rnd = new SecureRandom();
+
+        StringBuilder sb = new StringBuilder(length);
+        for( int i = 0; i < length; i++ ) {
+            sb.append(AB.charAt(rnd.nextInt(AB.length())));
+        }
+        return sb.toString();
     }
+        
+//        random = Objects.requireNonNull(random);
+//        symbols = symbols.toCharArray();
+//        this.buf = new char[length];
+
+//        SecureRandom secureRandom = new SecureRandom();
+//        byte [] token = new byte[6];
+//        secureRandom.nextBytes(token);
+//        return secureRandom.toString();
+
 
     private void addNewCaptcha(String secret, String encodedString) {
         CaptchaCodes captchaCodes = new CaptchaCodes();
         captchaCodes.setCode(secret);
-        captchaCodes.setSecretCode("encodedString");
+        captchaCodes.setSecretCode(encodedString);
         Date date = new Date();
 
         captchaCodes.setTime(new Timestamp(date.getTime()));
