@@ -1,7 +1,9 @@
 package main.repository;
 
 import main.model.CaptchaCodes;
+import main.model.ModerationStatus;
 import main.model.Post;
+import main.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,6 +52,20 @@ public interface PostRepository extends JpaRepository <Post, Integer> {
     @Query(value = "select p from Post p join fetch Tag2Post t on t.post = p where t.tag.name = :tagName")
     Page<Post> findAllByTag(Pageable pageable, String tagName);
 
+    @Query(value = "select p from Post p where p.moderationStatus = :status and p.status = 1")
+    Page<Post> findByModerationStatus(Pageable pageable, ModerationStatus status);
+
+    @Query(value = "select p from Post p where p.moderationStatus = :status and p.moderator = :moder and p.status = 1")
+    Page<Post> findByModerationStatusAndModerator(Pageable pageable, ModerationStatus status, User moder);
+
+    @Query(value = "select p from Post p where p.moderationStatus = :status and p.user = :user and p.status = 1")
+    Page<Post> findByModerationStatusAndUser(Pageable pageable, ModerationStatus status, User user);
+
+    @Query(value = "select p from Post p where  p.user = :user and p.status = 0")
+    Page<Post> findByStatusAndUser(Pageable pageable, User user);
+
+    @Query(value = "select p from Post p where p.moderationStatus = :status")
+    List<Post> findByModerationStatus(ModerationStatus status);
 
 
 }

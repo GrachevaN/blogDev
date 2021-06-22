@@ -42,15 +42,9 @@ public class User {
     @Column(columnDefinition = "text")
     private String photo;
 
-    @Transient
-    private long moderationCount;
 
-    public long getModerationCount() {
-        return moderationCount;
-    }
-
-    public void setModerationCount(long moderationCount) {
-        this.moderationCount = moderationCount;
+    public Role getRole() {
+        return getIs_moderator() == 1 ? Role.MODERATOR : Role.USER;
     }
 
     public byte getIs_moderator() {
@@ -63,10 +57,6 @@ public class User {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public byte isIs_moderator() {
-        return is_moderator;
     }
 
     public void setIs_moderator(byte is_moderator) {

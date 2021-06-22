@@ -14,9 +14,14 @@ public class UserDTO {
     private String photo;
     @JsonProperty("email")
     private String email;
+
     @JsonProperty(value = "moderation", defaultValue = "nontrue")
     private boolean moderation;
-    @JsonProperty(value = "moderationCount", defaultValue = "1000")
+
+    @JsonProperty(value = "settings", defaultValue = "false")
+    private boolean settings;
+
+    @JsonProperty(value = "moderationCount", defaultValue = "-200")
     private long moderationCount;
 
     public UserDTO(int id, String name, String photo, String email, byte Is_moderator) {
@@ -30,6 +35,11 @@ public class UserDTO {
     public UserDTO(int id, String name) {
         this.id = id;
         this.name = name;
+    }
+
+    public void setModeratorStatus() {
+        this.settings = true;
+        this.moderation = true;
     }
 
     public int getId() {

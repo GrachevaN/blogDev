@@ -43,6 +43,8 @@ public class PostDTO {
     @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private List<String> tags;
 
+    public PostDTO() {
+    }
 
     public PostDTO(int id, Timestamp timestamp, UserDTO user, String title)  {
         this.id = id;

@@ -1,24 +1,16 @@
-package main.api.response;
+package main.DTO;
 
-public class AddingNewUserResponse {
+import com.fasterxml.jackson.annotation.JsonInclude;
 
-    private boolean result;
+@JsonInclude(JsonInclude.Include.NON_NULL)
+public class ErrorsDTO {
+
     private String email;
     private String name;
     private String password;
     private String captcha;
-
-    public AddingNewUserResponse() {
-        this.result = true;
-    }
-
-    public boolean isResult() {
-        return result;
-    }
-
-    public void setResult(boolean result) {
-        this.result = result;
-    }
+    private String title;
+    private String text;
 
     public void setEmailError() {
         this.email = "Этот e-mail уже зарегистрирован";
@@ -36,5 +28,12 @@ public class AddingNewUserResponse {
         this.captcha = "Код с картинки введён неверно";
     }
 
+    public void setTitleError() {
+        this.title = "Заголовок не установлен";
+    }
+
+    public void setTextError() {
+        this.text = "Текст публикации слишком короткий";
+    }
 
 }
