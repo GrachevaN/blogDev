@@ -375,7 +375,7 @@ databaseChangeLog:
             columns:
               - column:
                   name: moderation_status
-                  value: "NEW"
+                  value: "ACCEPTED"
               - column:
                   name: is_active
                   value: 1

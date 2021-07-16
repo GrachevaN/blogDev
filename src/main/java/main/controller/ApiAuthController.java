@@ -44,23 +44,19 @@ public class ApiAuthController {
 
     @PostMapping("/register")
     public ResponseEntity<AddingNewResponse> registerNewUser(
-//            @RequestBody AuthUserRequest authUserRequest
-            @RequestParam String e_mail
-            , @RequestParam String password
-            , @RequestParam String name
-            , @RequestParam String captcha
-            , @RequestParam String captcha_secret
-            , @RequestParam String repeatPassword
+            @RequestBody AuthUserRequest authUserRequest
+//            @RequestParam String e_mail
+//            , @RequestParam String password
+//            , @RequestParam String name
+//            , @RequestParam String captcha
+//            , @RequestParam String captcha_secret
     ) {
 //        if (!authUserRequest.getPassword().equals(authUserRequest.getRepeatPassword())) {
 //            return ResponseEntity.ok(new AddingNewResponse());
 //        }
-//        return ResponseEntity.ok(authCheckService.registerNewUser(authUserRequest.getEmail(), authUserRequest.getCaptcha(),
-//                authUserRequest.getCaptcha_secret(), authUserRequest.getPassword(), authUserRequest.getName()));
-        if (!password.equals(repeatPassword)) {
-            return ResponseEntity.ok(new AddingNewResponse());
-        }
-        return ResponseEntity.ok(authCheckService.registerNewUser(e_mail, captcha, captcha_secret, password, name));
+        return ResponseEntity.ok(authCheckService.registerNewUser(authUserRequest.getEmail(), authUserRequest.getCaptcha(),
+                authUserRequest.getCaptchaSecret(), authUserRequest.getPassword(), authUserRequest.getName()));
+//        return ResponseEntity.ok(authCheckService.registerNewUser(e_mail, captcha, captcha_secret, password, name));
     }
 
 

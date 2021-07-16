@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -97,17 +98,21 @@ public class ApiPostService {
         PostDTO postDTO = new PostDTO();
         Calendar calendar = Calendar.getInstance();
         Post post = postRepository.findById(id).orElseThrow(() -> new DocumentNotFoundExc());
-        if ((post.getStatus()==1
-//                || authUser != null
-        )
+        if (
+                (post.getStatus()==1)
                 && post.getModerationStatus().equals(ModerationStatus.ACCEPTED)
-                && post.getPostTime().before((calendar.getTime())))
+                && post.getPostTime().before((calendar.getTime()))
+        )
         {
             UserDTO user = new UserDTO(post.getUser().getId(), post.getUser().getName());
             postDTO.setId(post.getId());
+//            calendar.setTimeInMillis(post.getPostTime().getTime());
+//            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+//            postDTO.setTimestamp(calendar.getTimeInMillis());
             postDTO.setTimestamp(post.getPostTime().getTime());
             postDTO.setUser(user);
             postDTO.setTitle(post.getTitle());
+            postDTO.setText(post.getTextContent());
             postDTO.setLikeCount(
                     votesRepository.findAll().stream().filter(vote ->
                             vote.getPost().equals(post)
@@ -120,7 +125,7 @@ public class ApiPostService {
                                     && vote.getValue() == -1
                     ).count()
             );
-            postDTO.setAnnounce(announceCreate(post.getTextContent()));
+//            postDTO.setAnnounce(announceCreate(post.getTextContent()));
 
 
             List<Comment> comments = commentsRepository.findCommentsByPost(post);
@@ -137,9 +142,10 @@ public class ApiPostService {
                 commentDTOList.add(commentDTO);
             });
 
-//            if (!commentDTOList.isEmpty()) {
-//                postDTO.setComments(commentDTOList);
-//            }
+
+            if (!commentDTOList.isEmpty()) {
+                postDTO.setComments(commentDTOList);
+            }
 
 
             List<Tag2Post> tags = tag2PostRepository.findByPost(post);
@@ -147,22 +153,20 @@ public class ApiPostService {
             tags.forEach(tag2Post -> {
                 tagsList.add(tag2Post.getTag().getName());
             });
-//            if (!tagsList.isEmpty()) {
-//                postDTO.setTags(tagsList);
-//            }
+            if (!tagsList.isEmpty()) {
+                postDTO.setTags(tagsList);
+            }
 
-//            if (authUser != null) {
                 if (authUser.getIs_moderator() != 1 && !authUser.equals(post.getUser())) {
                     post.setViewCount(post.getViewCount() + 1);
                     postDTO.setViewCount(post.getViewCount());
                     postRepository.save(post);
                 }
-                else {
-                    post.setViewCount(post.getViewCount() + 1);
-                    postDTO.setViewCount(post.getViewCount());
-                    postRepository.save(post);
-                }
-//            }
+//                else {
+//                    post.setViewCount(post.getViewCount() + 1);
+//                    postDTO.setViewCount(post.getViewCount());
+//                    postRepository.save(post);
+//                }
         }
         return postDTO;
     }
@@ -245,7 +249,7 @@ public class ApiPostService {
                 case "declined":
                     posts = postRepository.findByModerationStatusAndUser(pageable, ModerationStatus.DECLINED, user).getContent();
                     break;
-                case "accepted":
+                case "published":
                     posts = postRepository.findByModerationStatusAndUser(pageable, ModerationStatus.ACCEPTED, user).getContent();
                     break;
             }
@@ -264,12 +268,14 @@ public class ApiPostService {
     public AddingNewResponse addPost(Principal principal, Timestamp timestamp, byte active, String title, String text,
                                      List<String> tags) {
         User user = authCheckService.getAuthUser(principal);
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         AddingNewResponse addingNewResponse = new AddingNewResponse();
         if (!user.equals(null)) {
             ErrorsDTO errorsDTO = new ErrorsDTO();
             Calendar calendar = Calendar.getInstance();
             int textLength = 50;
-            if (title.isEmpty()) {
+            int titleLength = 3;
+            if (title.isEmpty() || title.length() < titleLength) {
                 errorsDTO.setTitleError();
                 addingNewResponse.setResult(false);
             }
@@ -278,7 +284,7 @@ public class ApiPostService {
                 addingNewResponse.setResult(false);
             }
             if (addingNewResponse.isResult()) {
-                if (!timestamp.before(calendar.getTime())) {
+                if (timestamp.before(calendar.getTime())) {
                     timestamp.setTime(calendar.getTime().getTime());
                 }
                 Post post = new Post();
@@ -312,6 +318,7 @@ public class ApiPostService {
                 .collect(Collectors.toList());
         posts.forEach(
                 post -> {
+                    calendar.setTimeInMillis(post.getPostTime().getTime());
                     PostDTO postDTO = makePostDTO(post);
                     apiPostResponse.increaseCount();
                     apiPostResponse.addPost(postDTO);
@@ -323,8 +330,8 @@ public class ApiPostService {
     private PostDTO makePostDTO (Post post) {
 
         UserDTO user = new UserDTO(post.getUser().getId(), post.getUser().getName());
-        PostDTO postDTO = new PostDTO(post.getId(), post.getPostTime()
-                , user, post.getTitle());
+        PostDTO postDTO = new PostDTO(post.getId(), post.getPostTime(),
+                user, post.getTitle());
         postDTO.setCommentCount(
                 commentsRepository.findAll().stream().filter(comment ->
                         comment.getPost().equals(post)

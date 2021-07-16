@@ -11,15 +11,15 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class DefaultController {
 
 
-    @RequestMapping("/")
+    @RequestMapping
     public String index(Model model) {
 //        model.addAttribute();
         return "index";
     }
 
-//    @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET, RequestMethod.POST}, value = "/**/{path}")
-//    public String redirectToIndex() {
-//        return "forward:/";
-//    }
+    @RequestMapping(method = {RequestMethod.OPTIONS, RequestMethod.GET, RequestMethod.POST}, value = "/**/{path:[^\\\\.]*}")
+    public String redirectToIndex() {
+        return "forward:/";
+    }
 
 }

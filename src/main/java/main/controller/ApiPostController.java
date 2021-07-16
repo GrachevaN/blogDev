@@ -2,6 +2,7 @@ package main.controller;
 
 
 import main.DTO.PostDTO;
+import main.api.request.NewPostRequest;
 import main.api.response.AddingNewResponse;
 import main.api.response.ApiPostResponse;
 import main.service.ApiPostService;
@@ -19,15 +20,15 @@ import java.util.List;
 @RequestMapping("/api/post")
 public class ApiPostController {
 
-    private ApiPostService apiPostService;
+    private final ApiPostService apiPostService;
 
     public ApiPostController(ApiPostService apiPostService) {
         this.apiPostService = apiPostService;
     }
 
 
-    @GetMapping("/")
-    @PreAuthorize("hasAuthority('user:write')")
+    @GetMapping
+//    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> getApiPosts (
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
@@ -37,17 +38,13 @@ public class ApiPostController {
         return ResponseEntity.ok(apiPostService.getApiPostResponse(pageable, mode));
     }
 
-    @PostMapping("/")
+    @PostMapping
     public ResponseEntity<AddingNewResponse> addPost(
-            @RequestParam Timestamp timestamp
-            , @RequestParam byte active
-            , @RequestParam String title
-            , @RequestParam List<String> tags
-            , @RequestParam String text
-//            , @RequestBody NewPostRequest postRequest
+            @RequestBody NewPostRequest newPostRequest
             , Principal principal
             ) {
-        return ResponseEntity.ok(apiPostService.addPost(principal, timestamp, active, title, text, tags));
+        return ResponseEntity.ok(apiPostService.addPost(principal, newPostRequest.getTimestamp(), newPostRequest.getActive(),
+                newPostRequest.getTitle(), newPostRequest.getText(), newPostRequest.getTags()));
     }
 
     @GetMapping("/search")
@@ -65,10 +62,10 @@ public class ApiPostController {
     public ResponseEntity<ApiPostResponse> getPostByDate (
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
-            , @RequestParam String theDate
+            , @RequestParam String date
     ){
         Pageable pageable = PageRequest.of(offset / limit, limit);
-        return ResponseEntity.ok(apiPostService.getPostByDate(pageable, theDate));
+        return ResponseEntity.ok(apiPostService.getPostByDate(pageable, date));
     }
 
     @GetMapping("/byTag")
@@ -103,7 +100,7 @@ public class ApiPostController {
     public ResponseEntity<ApiPostResponse> getMyPosts(
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
-            , @RequestParam(defaultValue = "recent") String status
+            , @RequestParam String status
             , Principal principal
     ) {
         Pageable pageable = PageRequest.of(offset / limit, limit);

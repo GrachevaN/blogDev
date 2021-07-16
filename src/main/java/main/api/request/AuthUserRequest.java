@@ -14,7 +14,8 @@ public class AuthUserRequest {
     String password;
     String name;
     String captcha;
-    String captcha_secret;
-    String repeatPassword;
+    @JsonProperty("captcha_secret")
+    String captchaSecret;
+//    String repeatPassword;
 
 }

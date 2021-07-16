@@ -19,14 +19,18 @@ public class PostDTO {
     @JsonProperty("timestamp")
     private long timestamp;
 
-
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private UserDTO user;
 
     @JsonProperty("title")
     private String title;
 
+    @JsonProperty("text")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
+    private String text;
+
     @JsonProperty("announce")
+    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     private String announce;
     @JsonProperty("likeCount")
     private long likeCount;
@@ -48,9 +52,18 @@ public class PostDTO {
 
     public PostDTO(int id, Timestamp timestamp, UserDTO user, String title)  {
         this.id = id;
+
         this.timestamp = timestamp.getTime();
         this.user = user;
         this.title = title;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
     }
 
     public List<CommentDTO> getComments() {
@@ -76,6 +89,7 @@ public class PostDTO {
     public void setId(int id) {
         this.id = id;
     }
+
 
     public long getTimestamp() {
         return timestamp;
