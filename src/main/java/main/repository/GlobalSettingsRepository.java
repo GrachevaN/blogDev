@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GlobalSettingsRepository extends JpaRepository <Settings, Integer> {
 
+    Settings findByCode(String code);
+
 }

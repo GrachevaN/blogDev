@@ -36,4 +36,8 @@ public class ErrorsDTO {
         this.text = "Текст публикации слишком короткий";
     }
 
+    public void setTextCommentError() {
+        this.text = "Текст комментария не задан или слишком короткий";
+    }
+
 }

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Optional;
 
 public interface PostRepository extends JpaRepository <Post, Integer> {
 
@@ -66,6 +67,12 @@ public interface PostRepository extends JpaRepository <Post, Integer> {
 
     @Query(value = "select p from Post p where p.moderationStatus = :status")
     List<Post> findByModerationStatus(ModerationStatus status);
+
+    List<Post> findAllByUserOrderByPostTime(User user);
+
+    @Query(value = "select p from Post p order by p.postTime")
+    List<Post> findAllPostByPostTime();
+//    findAllOrderByPostTime();
 
 
 }

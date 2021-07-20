@@ -1,6 +1,7 @@
 package main.api.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import main.DTO.ErrorsDTO;
 
 public class AddingNewResponse {
@@ -9,6 +10,10 @@ public class AddingNewResponse {
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     private ErrorsDTO error;
+
+    @JsonInclude(JsonInclude.Include.NON_DEFAULT)
+    @JsonProperty(value = "id", defaultValue = "-200")
+    private int id;
 
     public ErrorsDTO getError() {
         return error;
@@ -30,5 +35,11 @@ public class AddingNewResponse {
         this.result = result;
     }
 
+    public int getId() {
+        return id;
+    }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 }

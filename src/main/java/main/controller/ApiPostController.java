@@ -2,7 +2,9 @@ package main.controller;
 
 
 import main.DTO.PostDTO;
+import main.api.request.ModerationRequest;
 import main.api.request.NewPostRequest;
+import main.api.request.PostLikeRequest;
 import main.api.response.AddingNewResponse;
 import main.api.response.ApiPostResponse;
 import main.service.ApiPostService;
@@ -39,6 +41,7 @@ public class ApiPostController {
     }
 
     @PostMapping
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddingNewResponse> addPost(
             @RequestBody NewPostRequest newPostRequest
             , Principal principal
@@ -47,8 +50,16 @@ public class ApiPostController {
                 newPostRequest.getTitle(), newPostRequest.getText(), newPostRequest.getTags()));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<AddingNewResponse> changePostById (
+            @PathVariable int id, Principal principal,
+            @RequestBody NewPostRequest newPostRequest
+    ) {
+        return ResponseEntity.ok(apiPostService.rewritePost(id, principal, newPostRequest));
+    }
+
     @GetMapping("/search")
-    @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<ApiPostResponse> getSearchedPosts(
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
@@ -86,6 +97,7 @@ public class ApiPostController {
     }
 
     @GetMapping("/moderation")
+    @PreAuthorize("hasAuthority('user:moderate')")
     public ResponseEntity<ApiPostResponse> getPostForModeration(
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
@@ -96,7 +108,30 @@ public class ApiPostController {
         return ResponseEntity.ok(apiPostService.getModeratorsPosts(pageable, status, principal));
     }
 
+    @PostMapping("/like")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<AddingNewResponse> likePost(
+//            @RequestParam int post_id
+            @RequestBody PostLikeRequest postLikeRequest
+            , Principal principal
+    ) {
+        byte value = 1;
+        return ResponseEntity.ok(apiPostService.addLikeToPost(postLikeRequest.getPostId(), principal, value));
+    }
+
+    @PostMapping("/dislike")
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<AddingNewResponse> dislike(
+            @RequestBody PostLikeRequest postLikeRequest
+            , Principal principal
+    ) {
+        byte value = -1;
+        return ResponseEntity.ok(apiPostService.addLikeToPost(postLikeRequest.getPostId(), principal, value));
+    }
+
+
     @GetMapping("/my")
+    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<ApiPostResponse> getMyPosts(
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit

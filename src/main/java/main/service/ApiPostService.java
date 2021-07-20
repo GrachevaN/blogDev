@@ -5,6 +5,9 @@ import main.DTO.ErrorsDTO;
 import main.DTO.PostDTO;
 import main.DTO.UserDTO;
 import main.api.errs.DocumentNotFoundExc;
+import main.api.errs.NoAuthoraizedExc;
+import main.api.request.ModerationRequest;
+import main.api.request.NewPostRequest;
 import main.api.response.AddingNewResponse;
 import main.api.response.ApiPostResponse;
 import main.model.*;
@@ -40,6 +43,9 @@ public class ApiPostService {
 
     @Autowired
     private TagsRepository tagsRepository;
+
+    @Autowired
+    private GlobalSettingsRepository settingsRepository;
 
     private AuthCheckService authCheckService;
 
@@ -106,9 +112,6 @@ public class ApiPostService {
         {
             UserDTO user = new UserDTO(post.getUser().getId(), post.getUser().getName());
             postDTO.setId(post.getId());
-//            calendar.setTimeInMillis(post.getPostTime().getTime());
-//            calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
-//            postDTO.setTimestamp(calendar.getTimeInMillis());
             postDTO.setTimestamp(post.getPostTime().getTime());
             postDTO.setUser(user);
             postDTO.setTitle(post.getTitle());
@@ -125,9 +128,6 @@ public class ApiPostService {
                                     && vote.getValue() == -1
                     ).count()
             );
-//            postDTO.setAnnounce(announceCreate(post.getTextContent()));
-
-
             List<Comment> comments = commentsRepository.findCommentsByPost(post);
             List<CommentDTO> commentDTOList = new ArrayList<>();
 
@@ -146,8 +146,6 @@ public class ApiPostService {
             if (!commentDTOList.isEmpty()) {
                 postDTO.setComments(commentDTOList);
             }
-
-
             List<Tag2Post> tags = tag2PostRepository.findByPost(post);
             List<String> tagsList = new ArrayList<>();
             tags.forEach(tag2Post -> {
@@ -162,13 +160,36 @@ public class ApiPostService {
                     postDTO.setViewCount(post.getViewCount());
                     postRepository.save(post);
                 }
-//                else {
-//                    post.setViewCount(post.getViewCount() + 1);
-//                    postDTO.setViewCount(post.getViewCount());
-//                    postRepository.save(post);
-//                }
+                else {
+                    postDTO.setViewCount(post.getViewCount());
+                }
         }
         return postDTO;
+    }
+
+    public AddingNewResponse moderatePost(Principal principal, ModerationRequest moderationRequest) {
+        User authUser =  authCheckService.getAuthUser(principal);
+        AddingNewResponse addingNewResponse = new AddingNewResponse();
+        if (authUser != null) {
+            if (authUser.getIs_moderator() == 1) {
+                Optional<Post> optionalPost = postRepository.findById(moderationRequest.getPostId());
+                if (optionalPost.isPresent()) {
+                    Post post = optionalPost.get();
+                    switch (moderationRequest.getDecision()) {
+                        case ("accept"):
+                            post.setModerationStatus(ModerationStatus.ACCEPTED);
+                            break;
+                        case ("decline"):
+                            post.setModerationStatus(ModerationStatus.DECLINED);
+                            break;
+                    }
+                    post.setModerator(authUser);
+                    postRepository.save(post);
+                    addingNewResponse.setResult(true);
+                }
+            }
+        }
+        return addingNewResponse;
     }
 
     public ApiPostResponse getPostByDate (Pageable pageable, String theDate) {
@@ -235,9 +256,10 @@ public class ApiPostService {
     }
 
     public ApiPostResponse getMyPosts (Pageable pageable, String status, Principal principal) {
-        User user = authCheckService.getAuthUser(principal);
         ApiPostResponse apiPostResponse = new ApiPostResponse();
-        if (!user.equals(null)) {
+        if (!principal.equals(null)) {
+            User user = authCheckService.getAuthUser(principal);
+//        if (!user.equals(null)) {
             List<Post> posts = new ArrayList<>();
             switch (status) {
                 case "inactive":
@@ -265,12 +287,109 @@ public class ApiPostService {
         return apiPostResponse;
     }
 
+    public AddingNewResponse addLikeToPost(int post_id, Principal principal, byte value) throws NoAuthoraizedExc {
+        AddingNewResponse addingNewResponse = new AddingNewResponse();
+//        User user = authCheckService.getAuthUser(principal);
+        Calendar calendar = Calendar.getInstance();
+        if (!principal.equals(null)) {
+            User user = authCheckService.getAuthUser(principal);
+            Optional<Post> optionalPost = postRepository.findById(post_id);
+            if (optionalPost.isPresent()) {
+                Optional<Votes> optionalVotes = votesRepository.findByPostAndUser(optionalPost.get(), user);
+                if (optionalVotes.isPresent()) {
+                    Votes vote = optionalVotes.get();
+                    if (vote.getValue() == value) {
+                        addingNewResponse.setResult(false);
+                    }
+                    else {
+                        vote.setValue(value);
+                        vote.setVoteTime(new Timestamp(calendar.getTimeInMillis()));
+                        votesRepository.save(vote);
+                        addingNewResponse.setResult(true);
+                    }
+                }
+                else {
+                    Votes vote = new Votes();
+                    vote.setUser(user);
+                    vote.setPost(optionalPost.get());
+                    vote.setValue(value);
+                    vote.setVoteTime(new Timestamp(calendar.getTimeInMillis()));
+                    votesRepository.save(vote);
+                    addingNewResponse.setResult(true);
+                }
+            }
+
+        }
+        else {
+            throw new NoAuthoraizedExc();
+        }
+        return addingNewResponse;
+    }
+
+    public AddingNewResponse rewritePost(int id, Principal principal, NewPostRequest newPostRequest) {
+//        User user = authCheckService.getAuthUser(principal);
+        AddingNewResponse addingNewResponse = new AddingNewResponse();
+        Calendar calendar = Calendar.getInstance();
+        int textLength = 50;
+        int titleLength = 3;
+        if (!authCheckService.getAuthUser(principal).equals(null)) {
+            User user = authCheckService.getAuthUser(principal);
+            Post post = postRepository.findById(id).get();
+            ErrorsDTO errorsDTO = new ErrorsDTO();
+            if (newPostRequest.getTitle().isEmpty() || newPostRequest.getTitle().length() < titleLength) {
+                System.out.println("e1");
+                errorsDTO.setTitleError();
+                addingNewResponse.setResult(false);
+            }
+            if (newPostRequest.getText().length() < textLength) {
+                System.out.println("e2");
+                errorsDTO.setTextError();
+                addingNewResponse.setResult(false);
+            }
+            if (addingNewResponse.isResult()) {
+                addingNewResponse.setResult(true);
+                post.setTitle(newPostRequest.getTitle());
+                post.setTextContent(newPostRequest.getText());
+                if (newPostRequest.getTimestamp().before(calendar.getTime())) {
+                    newPostRequest.setTimestamp(new Timestamp(calendar.getTimeInMillis()));
+                }
+                post.setPostTime(newPostRequest.getTimestamp());
+                post.setStatus(newPostRequest.getActive());
+                List<Tag2Post> tag2Posts = tag2PostRepository.findByPost(post);
+                List<String> tags = new ArrayList<>();
+                tag2Posts.forEach(tag2Post -> {
+                    tags.add(tag2Post.getTag().getName());
+                });
+                if (!newPostRequest.getTags().isEmpty()) {
+                    newPostRequest.getTags().forEach(s -> {
+                        if (!tags.contains(s)) {
+                            Tag tag = tagsRepository.findByName(s).orElseThrow();
+                            Tag2Post tag2Post = new Tag2Post();
+                            tag2Post.setPost(post);
+                            tag2Post.setTag(tag);
+                            tag2PostRepository.save(tag2Post);
+                        }
+                    });
+                }
+                if (user.getIs_moderator() != 1) {
+                    post.setModerationStatus(ModerationStatus.NEW);
+                }
+                postRepository.save(post);
+            }
+            else {
+                addingNewResponse.setError(errorsDTO);
+            }
+        }
+        return addingNewResponse;
+    }
+
     public AddingNewResponse addPost(Principal principal, Timestamp timestamp, byte active, String title, String text,
                                      List<String> tags) {
-        User user = authCheckService.getAuthUser(principal);
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         AddingNewResponse addingNewResponse = new AddingNewResponse();
-        if (!user.equals(null)) {
+        Settings settings = settingsRepository.findByCode("POST_PREMODERATION");
+        if (!authCheckService.getAuthUser(principal).equals(null)) {
+            User user = authCheckService.getAuthUser(principal);
             ErrorsDTO errorsDTO = new ErrorsDTO();
             Calendar calendar = Calendar.getInstance();
             int textLength = 50;
@@ -293,6 +412,9 @@ public class ApiPostService {
                 post.setTitle(title);
                 post.setTextContent(text);
                 post.setUser(user);
+                if (settings.getValue().equals("NO")) {
+                    post.setModerationStatus(ModerationStatus.ACCEPTED);
+                }
                 postRepository.save(post);
 
                 if (!tags.isEmpty()) {
@@ -305,6 +427,12 @@ public class ApiPostService {
                     });
                 }
             }
+            else {
+                addingNewResponse.setError(errorsDTO);
+            }
+        }
+        else {
+            throw new NoAuthoraizedExc();
         }
         return addingNewResponse;
     }
@@ -369,5 +497,4 @@ public class ApiPostService {
         builder.append("...");
         return builder.toString();
     }
-
 }

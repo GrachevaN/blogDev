@@ -42,6 +42,13 @@ public class ApiAuthController {
         return authCheckService.getCaptcha();
     }
 
+    @PostMapping("/restore")
+    public void restorePassword(
+            @RequestParam String email
+    ) {
+                
+    }
+
     @PostMapping("/register")
     public ResponseEntity<AddingNewResponse> registerNewUser(
             @RequestBody AuthUserRequest authUserRequest
@@ -51,9 +58,7 @@ public class ApiAuthController {
 //            , @RequestParam String captcha
 //            , @RequestParam String captcha_secret
     ) {
-//        if (!authUserRequest.getPassword().equals(authUserRequest.getRepeatPassword())) {
-//            return ResponseEntity.ok(new AddingNewResponse());
-//        }
+
         return ResponseEntity.ok(authCheckService.registerNewUser(authUserRequest.getEmail(), authUserRequest.getCaptcha(),
                 authUserRequest.getCaptchaSecret(), authUserRequest.getPassword(), authUserRequest.getName()));
 //        return ResponseEntity.ok(authCheckService.registerNewUser(e_mail, captcha, captcha_secret, password, name));

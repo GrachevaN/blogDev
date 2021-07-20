@@ -54,7 +54,6 @@ public class AuthCheckService {
     @Autowired
     private final AuthenticationManager authenticationManager;
 
-    public static Map<String, Integer> sessions = new HashMap();
     public static int captchaWidth = 100;
     public static int captchaHeight = 35;
 
@@ -69,9 +68,6 @@ public class AuthCheckService {
         return loginResponse;
     }
 
-    public static Map<String, Integer> getSessions() {
-        return sessions;
-    }
 
     public User getAuthUser(Principal principal) {
         if (principal != null) {
@@ -83,10 +79,6 @@ public class AuthCheckService {
         return null;
     }
 
-
-    private void deleteUserSession(HttpSession session) {
-        sessions.remove(session.getId());
-    }
 
     public AuthCaptchaResponse getCaptcha() throws IOException {
         AuthCaptchaResponse authCaptchaResponse = new AuthCaptchaResponse();

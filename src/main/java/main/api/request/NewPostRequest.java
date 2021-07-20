@@ -10,11 +10,14 @@ import java.util.List;
 @AllArgsConstructor
 public class NewPostRequest {
 
-    Timestamp timestamp;
+    private Timestamp timestamp;
     byte active;
     String title;
     List<String> tags;
     String text;
+
+    public NewPostRequest() {
+    }
 
     public Timestamp getTimestamp() {
         return timestamp;
