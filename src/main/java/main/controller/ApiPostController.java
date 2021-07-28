@@ -1,8 +1,7 @@
 package main.controller;
 
 
-import main.DTO.PostDTO;
-import main.api.request.ModerationRequest;
+import main.dto.PostDTO;
 import main.api.request.NewPostRequest;
 import main.api.request.PostLikeRequest;
 import main.api.response.AddingNewResponse;
@@ -10,13 +9,12 @@ import main.api.response.ApiPostResponse;
 import main.service.ApiPostService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.sql.Timestamp;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/post")
@@ -30,7 +28,6 @@ public class ApiPostController {
 
 
     @GetMapping
-//    @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> getApiPosts (
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
@@ -57,6 +54,13 @@ public class ApiPostController {
             @RequestBody NewPostRequest newPostRequest
     ) {
         return ResponseEntity.ok(apiPostService.rewritePost(id, principal, newPostRequest));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<PostDTO> getPostById (
+            @PathVariable int id, Principal principal
+    ) {
+        return ResponseEntity.ok(apiPostService.getPostById(id, principal));
     }
 
     @GetMapping("/search")
@@ -89,12 +93,7 @@ public class ApiPostController {
         return ResponseEntity.ok(apiPostService.getPostsByTag(pageable, tag));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<PostDTO> getPostById (
-            @PathVariable int id, Principal principal
-    ) {
-        return ResponseEntity.ok(apiPostService.getPostById(id, principal));
-    }
+
 
     @GetMapping("/moderation")
     @PreAuthorize("hasAuthority('user:moderate')")
@@ -111,7 +110,6 @@ public class ApiPostController {
     @PostMapping("/like")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddingNewResponse> likePost(
-//            @RequestParam int post_id
             @RequestBody PostLikeRequest postLikeRequest
             , Principal principal
     ) {
@@ -132,13 +130,16 @@ public class ApiPostController {
 
     @GetMapping("/my")
     @PreAuthorize("hasAuthority('user:write')")
-    public ResponseEntity<ApiPostResponse> getMyPosts(
+    public ResponseEntity<?> getMyPosts(
             @RequestParam(defaultValue = "0") int offset
             , @RequestParam(defaultValue = "10") int limit
             , @RequestParam String status
             , Principal principal
     ) {
         Pageable pageable = PageRequest.of(offset / limit, limit);
+//        if (apiPostResponse.getCount() == 0) {
+//            return new ResponseEntity<>(apiPostResponse, HttpStatus.OK);
+//        }
         return ResponseEntity.ok(apiPostService.getMyPosts(pageable, status, principal));
     }
 

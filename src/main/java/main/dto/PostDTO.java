@@ -1,11 +1,8 @@
-package main.DTO;
+package main.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import main.model.User;
 
 import java.sql.Timestamp;
 import java.util.List;
@@ -53,7 +50,7 @@ public class PostDTO {
     public PostDTO(int id, Timestamp timestamp, UserDTO user, String title)  {
         this.id = id;
 
-        this.timestamp = timestamp.getTime();
+        this.timestamp = timestamp.getTime() / 1000;
         this.user = user;
         this.title = title;
     }
@@ -96,7 +93,7 @@ public class PostDTO {
     }
 
     public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp/1000;
     }
 
     public UserDTO getUser() {

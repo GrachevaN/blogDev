@@ -1,7 +1,4 @@
-package main.DTO;
-
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+package main.dto;
 
 public class TagDTO {
 

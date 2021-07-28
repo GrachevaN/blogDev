@@ -1,11 +1,21 @@
-spring.datasource.url: jdbc:mysql://localhost:3306/bloglib?useSSL = false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-spring.datasource.driver-class-name: com.mysql.cj.jdbc.Driver
-spring.datasource.username: root
-spring.datasource.password: 12345
-spring.jpa.hibernate.ddl-auto: none
-spring.jpa.database-platform: org.hibernate.dialect.MySQL8Dialect
-spring.jpa.show-sql: false
-spring.liquibase.enabled: false
+spring.datasource:
+  url: jdbc:mysql://localhost:3306/bloglib?useSSL = false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+  driver-class-name: com.mysql.cj.jdbc.Driver
+  username: root
+  password: 12345
+spring.jpa:
+  hibernate.ddl-auto: validate
+  database-platform: org.hibernate.dialect.MySQL8Dialect
+  show-sql: false
+spring.liquibase.enabled: true
+spring.mail:
+  host: smtp.gmail.com
+  port: 587
+  username: justtestit11@gmail.com
+  password: _testit123
+  properties.mail.smtp:
+    auth: true
+    starttls.enable: true
 
 
 

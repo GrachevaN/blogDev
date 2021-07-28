@@ -1,9 +1,9 @@
 package main.service;
 
-import main.DTO.CommentDTO;
-import main.DTO.ErrorsDTO;
-import main.DTO.PostDTO;
-import main.DTO.UserDTO;
+import main.dto.CommentDTO;
+import main.dto.ErrorsDTO;
+import main.dto.PostDTO;
+import main.dto.UserDTO;
 import main.api.errs.DocumentNotFoundExc;
 import main.api.errs.NoAuthoraizedExc;
 import main.api.request.ModerationRequest;
@@ -14,16 +14,11 @@ import main.model.*;
 import main.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.security.Principal;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -56,29 +51,30 @@ public class ApiPostService {
 
     public ApiPostResponse getApiPostResponse(Pageable pageable, String mode) {
         List<Post> posts = new ArrayList<>();
-
+        Calendar calendar = Calendar.getInstance();
         switch (mode) {
             case ("recent"):
-                posts = postRepository.findAllOrderByPostTime(pageable).getContent();
+                posts = postRepository.findAllOrderByPostTimeDesc(pageable, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
                 break;
             case ("popular"):
-                posts = postRepository.findAllByComment(pageable).getContent();
+                posts = postRepository.findAllByComment(pageable,  new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
                 break;
             case ("best"):
-                posts = postRepository.findAllByLikes(pageable).getContent();
+                posts = postRepository.findAllByLikes(pageable,  new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
                 break;
             case ("early"):
-                posts = postRepository.findAllOrderByPostTimeDesc(pageable).getContent();
+                posts = postRepository.findAllOrderByPostTime(pageable, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
                 break;
+
         }
 
         ApiPostResponse apiPostResponse = makePostResponse(posts);
         return apiPostResponse;
     }
 
-//    public ApiPostResponse searchPostResponse(Pageable pageable, String theQuery) {
     public ApiPostResponse searchPostResponse(Pageable pageable, String theQuery) {
         List<Post> posts = new ArrayList<>();
+        Calendar calendar = Calendar.getInstance();
         theQuery.trim();
         if (theQuery.isEmpty()) {
             theQuery = "recent";
@@ -86,11 +82,11 @@ public class ApiPostService {
 
         switch (theQuery) {
             case ("recent"):
-                posts = postRepository.findAllOrderByPostTime(pageable).getContent();
+                posts = postRepository.findAllOrderByPostTimeDesc(pageable, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
                 break;
             default:
-                posts.addAll(postRepository.findByTitleContaining(pageable, theQuery).getContent());
-                posts.addAll(postRepository.findByTextContentContaining(pageable, theQuery).getContent());
+                posts.addAll(postRepository.findByTitleContaining(pageable, theQuery, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent());
+                posts.addAll(postRepository.findAllByTextContent(pageable, theQuery, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent());
                 break;
         }
         ApiPostResponse apiPostResponse = makePostResponse(posts);
@@ -117,16 +113,10 @@ public class ApiPostService {
             postDTO.setTitle(post.getTitle());
             postDTO.setText(post.getTextContent());
             postDTO.setLikeCount(
-                    votesRepository.findAll().stream().filter(vote ->
-                            vote.getPost().equals(post)
-                                    && vote.getValue() == 1
-                    ).count()
+                    votesRepository.findAllByPostAndValue(post, (byte) 1).size()
             );
             postDTO.setDislikeCount(
-                    votesRepository.findAll().stream().filter(vote ->
-                            vote.getPost().equals(post)
-                                    && vote.getValue() == -1
-                    ).count()
+                    votesRepository.findAllByPostAndValue(post, (byte) -1).size()
             );
             List<Comment> comments = commentsRepository.findCommentsByPost(post);
             List<CommentDTO> commentDTOList = new ArrayList<>();
@@ -155,14 +145,15 @@ public class ApiPostService {
                 postDTO.setTags(tagsList);
             }
 
+            if (principal != null) {
                 if (authUser.getIs_moderator() != 1 && !authUser.equals(post.getUser())) {
                     post.setViewCount(post.getViewCount() + 1);
                     postDTO.setViewCount(post.getViewCount());
                     postRepository.save(post);
-                }
-                else {
+                } else {
                     postDTO.setViewCount(post.getViewCount());
                 }
+            }
         }
         return postDTO;
     }
@@ -202,7 +193,7 @@ public class ApiPostService {
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         Timestamp stopTimestamp = new Timestamp(calendar.getTime().getTime());
-        List<Post> posts = postRepository.findPostByPostTimeContaining(pageable, timestamp, stopTimestamp).getContent();
+        List<Post> posts = postRepository.findPostByPostTimeContaining(pageable, timestamp, stopTimestamp, ModerationStatus.ACCEPTED).getContent();
         ApiPostResponse apiPostResponse = makePostResponse(posts);
 
         return apiPostResponse;
@@ -211,12 +202,13 @@ public class ApiPostService {
     public ApiPostResponse getPostsByTag (Pageable pageable, String tag) {
 
         ApiPostResponse apiPostResponse = new ApiPostResponse();
+        Calendar calendar = Calendar.getInstance();
 
         if (tag.isEmpty()) {
             return apiPostResponse;
         }
         else {
-            List<Post> posts = postRepository.findAllByTag(pageable, tag).getContent();
+            List<Post> posts = postRepository.findAllByTag(pageable, tag, new Timestamp(calendar.getTimeInMillis()), ModerationStatus.ACCEPTED).getContent();
             apiPostResponse = makePostResponse(posts);
 
             return apiPostResponse;
@@ -363,7 +355,16 @@ public class ApiPostService {
                 if (!newPostRequest.getTags().isEmpty()) {
                     newPostRequest.getTags().forEach(s -> {
                         if (!tags.contains(s)) {
-                            Tag tag = tagsRepository.findByName(s).orElseThrow();
+                            Optional<Tag> optionalTag = tagsRepository.findByName(s);
+                            Tag tag;
+                            if (!optionalTag.isPresent()) {
+                                tag = new Tag();
+                                tag.setName(s);
+                                tagsRepository.save(tag);
+                            }
+                            else {
+                                tag = optionalTag.get();
+                            }
                             Tag2Post tag2Post = new Tag2Post();
                             tag2Post.setPost(post);
                             tag2Post.setTag(tag);
@@ -440,10 +441,10 @@ public class ApiPostService {
     private ApiPostResponse makePostResponse (List<Post> posts) {
         ApiPostResponse apiPostResponse = new ApiPostResponse();
         Calendar calendar = Calendar.getInstance();
-        posts = posts.stream().filter(x -> x.getStatus()==1
-                && x.getModerationStatus().equals(ModerationStatus.ACCEPTED)
-                && x.getPostTime().before((calendar.getTime())))
-                .collect(Collectors.toList());
+//        posts = posts.stream().filter(x -> x.getStatus()==1
+//                && x.getModerationStatus().equals(ModerationStatus.ACCEPTED)
+//                && x.getPostTime().before((calendar.getTime())))
+//                .collect(Collectors.toList());
         posts.forEach(
                 post -> {
                     calendar.setTimeInMillis(post.getPostTime().getTime());

@@ -1,8 +1,14 @@
-package main.DTO;
+package main.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
 public class ErrorsDTO {
 
     private String email;
@@ -11,6 +17,8 @@ public class ErrorsDTO {
     private String captcha;
     private String title;
     private String text;
+    private String photo;
+    private String code;
 
     public void setEmailError() {
         this.email = "Этот e-mail уже зарегистрирован";
@@ -40,4 +48,9 @@ public class ErrorsDTO {
         this.text = "Текст комментария не задан или слишком короткий";
     }
 
+    public void setPhoto() {this.photo = "Фото слишком большое, нужно не более 5 Мб";}
+
+    public void setCode() {
+        this.code = "Ссылка для восстановления пароля устарела. <a href= \"/auth/restore\">Запросить ссылку снова</a>";
+    }
 }

@@ -1,6 +1,6 @@
 package main.service;
 
-import main.DTO.ErrorsDTO;
+import main.dto.ErrorsDTO;
 import main.api.request.CommentRequest;
 import main.api.response.AddingNewResponse;
 import main.model.Comment;

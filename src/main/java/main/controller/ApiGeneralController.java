@@ -1,15 +1,17 @@
 package main.controller;
 
 
-import main.api.request.CommentRequest;
-import main.api.request.ModerationRequest;
-import main.api.request.NewSettingsRequest;
+import main.api.request.*;
 import main.api.response.*;
 import main.service.*;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @RestController
@@ -24,8 +26,10 @@ public class ApiGeneralController {
     private final ApiPostService apiPostService;
     private final AddCommentService addCommentService;
     private final ApiStatisticService apiStatisticService;
+    private final AddImageService addImageService;
+    private final ApiProfileService apiProfileService;
 
-    public ApiGeneralController(InitResponse initResponse, SettingsService settingsService, ApiTagsService apiTagsService, ApiCalendarService apiCalendarService, ApiPostService apiPostService, AddCommentService addCommentService, ApiStatisticService apiStatisticService) {
+    public ApiGeneralController(InitResponse initResponse, SettingsService settingsService, ApiTagsService apiTagsService, ApiCalendarService apiCalendarService, ApiPostService apiPostService, AddCommentService addCommentService, ApiStatisticService apiStatisticService, AddImageService addImageService, ApiProfileService apiProfileService) {
         this.initResponse = initResponse;
         this.settingsService = settingsService;
         this.apiTagsService = apiTagsService;
@@ -33,6 +37,8 @@ public class ApiGeneralController {
         this.apiPostService = apiPostService;
         this.addCommentService = addCommentService;
         this.apiStatisticService = apiStatisticService;
+        this.addImageService = addImageService;
+        this.apiProfileService = apiProfileService;
     }
 
     @GetMapping("/init")
@@ -42,8 +48,8 @@ public class ApiGeneralController {
 
 
     @GetMapping("/settings")
-    public GlobalSettingsResponse settingsGet () {
-        return settingsService.getSettingsResponse();
+    public ResponseEntity<?> settingsGet () {
+            return ResponseEntity.ok(settingsService.getSettingsResponse());
     }
 
 
@@ -70,13 +76,33 @@ public class ApiGeneralController {
         return apiCalendarService.getApiCalendar(year);
     }
 
+    @PostMapping(value = "/image", consumes = { "multipart/form-data" })
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<?> postImage(
+            @RequestParam("image") MultipartFile file
+    ) throws IOException {
+        AddingNewResponse addingNewResponse = addImageService.addImage(file);
+        if (addingNewResponse.isResult()) {
+            return ResponseEntity.ok(addingNewResponse);
+        }
+        else {
+            return new ResponseEntity<>(addingNewResponse, HttpStatus.BAD_REQUEST);
+        }
+    }
+
     @PostMapping("/comment")
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<AddingNewResponse> addComment(
             @RequestBody CommentRequest commentRequest,
             Principal principal
             ) {
-        return ResponseEntity.ok(addCommentService.addComment(principal, commentRequest));
+        AddingNewResponse addingNewResponse = addCommentService.addComment(principal, commentRequest);
+        if (addingNewResponse.isResult()) {
+            return ResponseEntity.ok(addingNewResponse);
+        }
+        else {
+            return new ResponseEntity<>(addingNewResponse, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @PostMapping("/moderation")
@@ -88,10 +114,32 @@ public class ApiGeneralController {
         return ResponseEntity.ok(apiPostService.moderatePost(principal, moderationRequest));
     }
 
-    @PostMapping("/profile/my")
-    public void updateProfile() {
 
+    @PostMapping(value = "/profile/my",
+            consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}
+//            consumes = {"multipart/form-data"}
+//            consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}
+            )
+    @PreAuthorize("hasAuthority('user:write')")
+    public ResponseEntity<?> updateProfile(
+            @ModelAttribute ProfileUpdateRequest profileUpdateRequest,
+            Principal principal
+            ) throws IOException {
+
+        return ResponseEntity.ok(apiProfileService.profileEdit(profileUpdateRequest, principal));
     }
+
+    @PostMapping(value = "/profile/my",
+            consumes = {MediaType.APPLICATION_JSON_VALUE}
+    )
+    public ResponseEntity<?> updateProfile1(
+            @RequestBody NoPhotoProfileUpdate noPhotoProfileUpdate,
+            Principal principal
+    ) throws IOException {
+        return ResponseEntity.ok(apiProfileService.profileEditWithoutPhoto(noPhotoProfileUpdate, principal));
+    }
+
+
 
     @GetMapping("/statistics/my")
     @PreAuthorize("hasAuthority('user:write')")
@@ -100,8 +148,18 @@ public class ApiGeneralController {
     }
 
     @GetMapping("/statistics/all")
-    public StatisticResponse getAllUserStatistics(Principal principal) {
-        return apiStatisticService.getAllUserStatistic(principal);
+    public ResponseEntity<?> getAllUserStatistics(Principal principal) {
+        if (settingsService.getStatisticStatus().equals("YES")) {
+            return ResponseEntity.ok(apiStatisticService.getAllUserStatistic(principal));
+        }
+        else {
+            if (principal == null) {
+                return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+            }
+            else {
+                return ResponseEntity.ok(apiStatisticService.getAllUserStatistic(principal));
+            }
+        }
     }
 
 }

@@ -3,8 +3,9 @@ package main.service;
 
 import com.github.cage.Cage;
 import com.github.cage.GCage;
-import main.DTO.ErrorsDTO;
-import main.DTO.UserDTO;
+import main.api.request.AuthUserRequest;
+import main.dto.ErrorsDTO;
+import main.dto.UserDTO;
 import main.api.request.LoginRequest;
 import main.api.response.AddingNewResponse;
 import main.api.response.AuthCaptchaResponse;
@@ -17,6 +18,9 @@ import main.repository.PostRepository;
 import main.repository.UserRepository;
 import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -51,12 +55,17 @@ public class AuthCheckService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Qualifier("getJavaMailSender")
+    @Autowired
+    public JavaMailSender emailSender;
+
     @Autowired
     private final AuthenticationManager authenticationManager;
 
     public static int captchaWidth = 100;
     public static int captchaHeight = 35;
-
+    public static int captchaLength = 6;
+    public static int codeLength = 18;
 
     public AuthCheckService(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -67,7 +76,6 @@ public class AuthCheckService {
         LoginResponse loginResponse = getLoginResponse(principal.getName());
         return loginResponse;
     }
-
 
     public User getAuthUser(Principal principal) {
         if (principal != null) {
@@ -80,11 +88,74 @@ public class AuthCheckService {
     }
 
 
+
+    public AddingNewResponse passwordRestore(String email) {
+        String subjectText = "Password restore";
+        AddingNewResponse addingNewResponse = new AddingNewResponse();
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        System.out.println();
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            String passwordHashCode = generateCode(codeLength);
+            String passwordRestoreURL = "/login/change-password/" + passwordHashCode;
+            user.setCode(passwordHashCode);
+            userRepository.save(user);
+            System.out.println(passwordHashCode);
+            SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+            simpleMailMessage.setTo(email);
+            simpleMailMessage.setSubject(subjectText);
+            simpleMailMessage.setText(passwordRestoreURL);
+            emailSender.send(simpleMailMessage);
+
+            addingNewResponse.setResult(true);
+        }
+        else {
+            addingNewResponse.setResult(false);
+        }
+        return addingNewResponse;
+    }
+
+
+    public AddingNewResponse newPasswordRestore(AuthUserRequest authUserRequest) {
+        AddingNewResponse addingNewResponse = new AddingNewResponse();
+        addingNewResponse.setResult(true);
+        ErrorsDTO errorsDTO = new ErrorsDTO();
+        Optional<User> optionalUser = userRepository.findByCode(authUserRequest.getCode());
+        if (optionalUser.isPresent()) {
+            User user = optionalUser.get();
+            CaptchaCodes captchaCodes = captchaRepository.findBySecretCode(authUserRequest.getCaptchaSecret());
+            if (!captchaCodes.getCode().equals(authUserRequest.getCaptcha())) {
+                errorsDTO.setCaptchaError();
+                addingNewResponse.setResult(false);
+                System.out.println(errorsDTO.getCaptcha());
+            }
+            if (authUserRequest.getPassword().length() < 6) {
+                errorsDTO.setPasswordError();
+                addingNewResponse.setResult(false);
+                System.out.println(errorsDTO.getPassword());
+            }
+            if (addingNewResponse.isResult()) {
+                user.setPassword(authUserRequest.getPassword());
+                userRepository.save(user);
+            }
+        }
+        else {
+            addingNewResponse.setResult(false);
+            errorsDTO.setCode();
+        }
+        if (!addingNewResponse.isResult()) {
+            addingNewResponse.setError(errorsDTO);
+        }
+        return addingNewResponse;
+
+    }
+
+
     public AuthCaptchaResponse getCaptcha() throws IOException {
         AuthCaptchaResponse authCaptchaResponse = new AuthCaptchaResponse();
         Cage cage = new GCage();
 
-        String captcha = generateCode();
+        String captcha = generateCode(captchaLength);
         byte[] fileContent = cage.draw(captcha);
         ByteArrayInputStream bais = new ByteArrayInputStream(fileContent);
         BufferedImage image = ImageIO.read(bais);
@@ -114,12 +185,19 @@ public class AuthCheckService {
                         ));
         SecurityContextHolder.getContext().setAuthentication(authentication);
         org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        LoginResponse loginResponse = getLoginResponse(user.getUsername());
+        LoginResponse loginResponse;
+        if (user != null) {
+            loginResponse = getLoginResponse(user.getUsername());
+        }
+        else {
+            loginResponse = new LoginResponse();
+            loginResponse.setResult(false);
+        }
         return loginResponse;
     }
 
     private LoginResponse getLoginResponse(String email) {
-        main.model.User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
+        User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException(email));
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setResult(true);
 
@@ -163,21 +241,24 @@ public class AuthCheckService {
         AddingNewResponse addingNewResponse = new AddingNewResponse();
         Optional<User> optionalUser = userRepository.findByEmail(email);
         ErrorsDTO errorsDTO = new ErrorsDTO();
-
+        addingNewResponse.setResult(true);
         if (optionalUser.isPresent()) {
             errorsDTO.setEmailError();
             addingNewResponse.setResult(false);
+            System.out.println(errorsDTO.getEmail());
         }
 
         if (password.length() < 6) {
             errorsDTO.setPasswordError();
             addingNewResponse.setResult(false);
+            System.out.println(errorsDTO.getPassword());
         }
 
         CaptchaCodes captchaCodes = captchaRepository.findBySecretCode(captchaSecret);
         if (!captchaCodes.getCode().equals(captcha)) {
             errorsDTO.setCaptchaError();
             addingNewResponse.setResult(false);
+            System.out.println(errorsDTO.getCaptcha());
         }
 
         if (addingNewResponse.isResult()) {
@@ -196,8 +277,8 @@ public class AuthCheckService {
     }
 
 
-    private String generateCode () {
-        int length = 6;
+    public String generateCode (int length) {
+//        int length = 6;
         String AB = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         SecureRandom rnd = new SecureRandom();
         StringBuilder sb = new StringBuilder(length);

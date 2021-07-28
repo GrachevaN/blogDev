@@ -1,7 +1,7 @@
 package main.api.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import main.DTO.PostDTO;
+import main.dto.PostDTO;
 
 import java.util.ArrayList;
 import java.util.List;

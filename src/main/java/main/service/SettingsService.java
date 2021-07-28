@@ -64,6 +64,21 @@ public class SettingsService {
         }
     }
 
+    public String getMultiUserModeServiceStatus() {
+        Settings settings1 = settingsRepository.findByCode("MULTIUSER_MODE");
+        return settings1.getValue();
+    }
+
+    public String getPostModerationStatus() {
+        Settings settings = settingsRepository.findByCode("POST_PREMODERATION");
+        return settings.getValue();
+    }
+
+    public String getStatisticStatus() {
+        Settings settings = settingsRepository.findByCode("STATISTICS_IS_PUBLIC");
+        return settings.getValue();
+    }
+
 
     private boolean getBooleanValue(String val) {
         switch (val) {

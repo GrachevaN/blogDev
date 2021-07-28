@@ -1,18 +1,16 @@
 package main.service;
 
 
-import main.DTO.TagDTO;
+import main.dto.TagDTO;
 import main.api.response.ApiGetTagsResponse;
 import main.model.ModerationStatus;
 import main.model.Post;
 import main.model.Tag;
 import main.repository.PostRepository;
-import main.repository.Tag2PostRepository;
 import main.repository.TagsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;

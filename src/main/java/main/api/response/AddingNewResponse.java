@@ -2,8 +2,12 @@ package main.api.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import main.DTO.ErrorsDTO;
+import lombok.Getter;
+import lombok.Setter;
+import main.dto.ErrorsDTO;
 
+@Getter
+@Setter
 public class AddingNewResponse {
 
     private boolean result;
@@ -15,31 +19,7 @@ public class AddingNewResponse {
     @JsonProperty(value = "id", defaultValue = "-200")
     private int id;
 
-    public ErrorsDTO getError() {
-        return error;
-    }
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private String imageValue;
 
-    public void setError(ErrorsDTO error) {
-        this.error = error;
-    }
-
-    public AddingNewResponse() {
-        this.result = true;
-    }
-
-    public boolean isResult() {
-        return result;
-    }
-
-    public void setResult(boolean result) {
-        this.result = result;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
 }

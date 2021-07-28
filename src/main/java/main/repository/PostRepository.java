@@ -17,41 +17,42 @@ public interface PostRepository extends JpaRepository <Post, Integer> {
 
 
 
-    @Query(value = "select o from Post o " +
-            "join fetch Comment c on c.post = o " +
-            "group by (c.post)" +
-            "order by count (c) desc ")
-    Page<Post> findAllByComment(Pageable pageable);
+    @Query(value = "select p from Post p " +
+            "left join fetch Comment c on c.post = p " +
+            "where p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus " +
+            "group by (c.post) order by count (c) desc ")
+    Page<Post> findAllByComment(Pageable pageable, Timestamp currentTime, ModerationStatus moderationStatus);
 
 
     @Query(value = "select p from Post p " +
             "join fetch Votes v on v.post = p " +
-            "where (v.value = 1) " +
+            "where (v.value = 1) and p.status = 1 and p.postTime < :currentTime and p.moderationStatus = :moderationStatus " +
             "group by (v.post) order by count (p) desc")
-    Page<Post> findAllByLikes(Pageable pageable);
+    Page<Post> findAllByLikes(Pageable pageable, Timestamp currentTime, ModerationStatus moderationStatus);
 
-    @Query(value = "select p from Post p order by (p.postTime) desc")
-    Page<Post> findAllOrderByPostTimeDesc(Pageable pageable);
+    @Query(value = "select p from Post p where p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus order by (p.postTime) desc")
+    Page<Post> findAllOrderByPostTimeDesc(Pageable pageable, Timestamp currentTime, ModerationStatus moderationStatus);
 
-    @Query(value = "select p from Post p order by (p.postTime)")
-    Page<Post> findAllOrderByPostTime(Pageable pageable);
+    @Query(value = "select p from Post p where p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus order by (p.postTime)")
+    Page<Post> findAllOrderByPostTime(Pageable pageable, Timestamp currentTime, ModerationStatus moderationStatus);
 
 
-    @Query(value = "select p from Post p where p.textContent LIKE %:queryText%")
-    Page<Post> findAllByTextContent(Pageable pageable, String queryText);
+    @Query(value = "select p from Post p where p.textContent LIKE %:queryText% and p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus")
+    Page<Post> findAllByTextContent(Pageable pageable, String queryText, Timestamp currentTime, ModerationStatus moderationStatus);
 
-    Page<Post> findByTitleContaining(Pageable pageable, String queryText);
+    @Query(value = "select p from Post p where p.title LIKE %:queryText% and p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus")
+    Page<Post> findByTitleContaining(Pageable pageable, String queryText, Timestamp currentTime, ModerationStatus moderationStatus);
 
     Page<Post> findByTextContentContaining(Pageable pageable, String queryText);
 
-    @Query(value = "select p from Post p where p.postTime between :postTime and :stopTime")
+    @Query(value = "select p from Post p where p.postTime between :postTime and :stopTime and p.status = 1 and p.moderationStatus = :moderationStatus")
 //    WHERE datetime BETWEEN '2015-01-01' AND '2015-01-01 23:59:59'
-    Page<Post> findPostByPostTimeContaining(Pageable pageable, Timestamp postTime, Timestamp stopTime);
+    Page<Post> findPostByPostTimeContaining(Pageable pageable, Timestamp postTime, Timestamp stopTime, ModerationStatus moderationStatus);
 
 //    Page<Post> findPostByPostTimeBefore(Pageable pageable, Timestamp time);
 
-    @Query(value = "select p from Post p join fetch Tag2Post t on t.post = p where t.tag.name = :tagName")
-    Page<Post> findAllByTag(Pageable pageable, String tagName);
+    @Query(value = "select p from Post p join fetch Tag2Post t on t.post = p where t.tag.name = :tagName and p.postTime < :currentTime and p.status = 1 and p.moderationStatus = :moderationStatus")
+    Page<Post> findAllByTag(Pageable pageable, String tagName, Timestamp currentTime, ModerationStatus moderationStatus);
 
     @Query(value = "select p from Post p where p.moderationStatus = :status and p.status = 1")
     Page<Post> findByModerationStatus(Pageable pageable, ModerationStatus status);
