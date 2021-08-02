@@ -12,9 +12,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.util.Optional;
 
@@ -39,7 +43,7 @@ public class ApiProfileService {
         this.addImageService = addImageService;
     }
 
-    public AddingNewResponse profileEdit(ProfileUpdateRequest profileUpdateRequest, Principal principal) throws IOException {
+    public AddingNewResponse profileEdit(ProfileUpdateRequest profileUpdateRequest, Principal principal, HttpServletRequest request) throws IOException {
 
         AddingNewResponse addingNewResponse = new AddingNewResponse();
         addingNewResponse.setResult(true);
@@ -56,12 +60,12 @@ public class ApiProfileService {
         }
         if (profileUpdateRequest.getRemovePhoto() == 0 && profileUpdateRequest.getPhoto() != null) {
             if (user.getPhoto() != null) {
-                imageRemove(user.getPhoto());
+                imageRemove(user.getPhoto(), request);
             }
-            AddingNewResponse photoResponse = addImageService.addImage(profileUpdateRequest.getPhoto());
+            AddingNewResponse photoResponse = addImageService.addImage(profileUpdateRequest.getPhoto(), request);
             if(photoResponse.isResult()) {
                 user.setPhoto(photoResponse.getImageValue());
-                imageResize(photoResponse.getImageValue());
+                imageResize(photoResponse.getImageValue(), request);
             }
             else {
                 errorsDTO.setPhoto();
@@ -92,7 +96,7 @@ public class ApiProfileService {
     }
 
 
-    public AddingNewResponse profileEditWithoutPhoto(NoPhotoProfileUpdate noPhotoProfileUpdate, Principal principal) throws IOException {
+    public AddingNewResponse profileEditWithoutPhoto(NoPhotoProfileUpdate noPhotoProfileUpdate, Principal principal, HttpServletRequest request) throws IOException {
 
         AddingNewResponse addingNewResponse = new AddingNewResponse();
         addingNewResponse.setResult(true);
@@ -112,7 +116,7 @@ public class ApiProfileService {
             user.setPhoto(null);
 //            delete photo
             if (uri != null) {
-                imageRemove(uri);
+                imageRemove(uri, request);
             }
         }
         if (noPhotoProfileUpdate.getName() != null) {
@@ -141,30 +145,27 @@ public class ApiProfileService {
 
 
 
-    public void imageRemove(String uri) {
+    public void imageRemove(String uri, HttpServletRequest request) {
 
-        File file = new File(uri);
-
-        if (file.delete()) {
-            System.out.println(file.getName() + " deleted");
-        } else {
-            System.out.println(file.getName() + " not deleted");
-        }
-        String folderPath = uri.substring(0, uri.lastIndexOf("/"));
-        File directory = new File(folderPath);
-        if (directory != null) {
-
-            if (directory.listFiles().length == 0) {
-                directory.delete();
+        String realPath = request.getServletContext().getRealPath(uri);
+        File file = new File(realPath);
+//        File file = new File(uri);
+        file.delete();
+        String folderPath = uri.substring(0, uri.lastIndexOf("\\"));
+        Path directory = Paths.get(folderPath);
+        if (Files.exists(directory)) {
+            File fileDir = new File(folderPath);
+            if (fileDir.listFiles().length == 0) {
+                fileDir.delete();
             }
         }
-
     }
 
-    public void imageResize(String uri) {
+    public void imageResize(String uri, HttpServletRequest request) {
         int imageWidth = imageSize;
         int imageHeight = imageSize;
-        File file = new File(uri);
+        String realPath = request.getServletContext().getRealPath(uri);
+        File file = new File(realPath);
         try {
             BufferedImage image = ImageIO.read(file);
 
@@ -185,10 +186,10 @@ public class ApiProfileService {
             }
 
             BufferedImage scaledImage = Scalr.resize(image, imageWidth, imageHeight);
-            file.delete();
 
             String imageType = file.getName().substring(file.getName().lastIndexOf(".") + 1);
-            File newFile = new File(uri.substring(0, uri.lastIndexOf("/")) + "/" + file.getName());
+            File newFile = new File(realPath.substring(0, realPath.lastIndexOf("\\")) + "\\" + file.getName());
+            file.delete();
             ImageIO.write(scaledImage, imageType, newFile);
             System.out.println("resized");
 

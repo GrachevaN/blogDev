@@ -601,3 +601,314 @@ databaseChangeLog:
               - column:
                   name: value
                   value: "NO"
+
+
+
+  - changeSet:
+      id: 3
+      author: natalie
+      comment: "Add test data"
+      changes:
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title3"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод проверяет введенные данные и производит авторизацию пользователя, если введенные данные
+                          верны. Если пользователь авторизован, идентификатор его сессии должен запоминаться в Map<String,
+                          Integer> со значением, равным ID пользователя, которому принадлежит данная сессия."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title4"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "В параметрах объекта user выводятся имя пользователя, ссылка на его аватар, e-mail, параметры
+                          moderation (если равен true, то у пользователя есть права на модерацию и в выпадающем меню
+                          справа будет отображаться пункт меню Модерация с цифрой, указанной в параметре
+                          moderationCount) и settings (если равен true, то пользователю доступны настройки блога). Оба
+                          параметра - moderation и settings - должны быть равны true, если пользователь является
+                          модератором."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title5"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Значение moderationCount содержит количество постов необходимых для проверки модераторами.
+                          Считаются посты имеющие статус NEW и не проверерны модератором. Если пользователь не модератор
+                          возращать 0 в moderationCount."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title5"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод обрабатывает информацию, введённую пользователем в форму редактирования своего
+                          профиля. Если пароль не введён, его не нужно изменять. Если введён, должна проверяться его
+                          корректность: достаточная длина. Одинаковость паролей, введённых в двух полях, проверяется на
+                          frontend - на сервере проверка не требуется."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title6"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод проверяет наличие в базе пользователя с указанным e-mail. Если пользователь найден, ему
+                          должно отправляться письмо со ссылкой на восстановление пароля следующего вида -
+                          /login/change-password/HASH, где HASH - сгенерированный код вида
+                          b55ca6ea6cb103c6384cfa366b7ce0bdcac092be26bc0 (код должен генерироваться случайным образом
+                          и сохраняться в базе данных в поле users.code)."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title6"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод проверяет корректность кода восстановления пароля (параметр code) и корректность кодов
+                          капчи: введённый код (параметр captcha) должен совпадать со значением в поле code таблицы
+                          captcha_codes, соответствующем пришедшему значению секретного кода (параметр captcha_secret
+                          и поле secret_code в таблице базы данных).
+                          Авторизация: не требуется"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title7"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод возвращает статистику постов текущего авторизованного пользователя: общие количества
+                          параметров для всех публикаций, у который он является автором и доступные для чтения.
+                          ❗ Авторизация: требуется"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title8"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Метод сохраняет в таблицу post_votes дизлайк текущего авторизованного пользователя. В случае
+                          повторного дизлайка возвращает {result: false}.
+                          Если до этого этот же пользователь поставил на этот же пост лайк, этот лайк должен заменен на дизлайк
+                          в базе данных.
+                          ❗ Авторизация: требуется"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title9"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "Mетод записывает глобальные настройки блога в таблицу global_settings, если запрашивающий
+                          пользователь авторизован и является модератором.
+                          ❗ Авторизация: требуется
+                          Запрос:"
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title10"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "MULTIUSER_MODE — если включен этот режим, в блоге разрешена регистрация новых пользователей.
+                          Если режим выключен, регистрация пользователей не доступна, на фронте на месте ссылки на страницу
+                          регистрации появляется текст Регистрация закрыта. При запросе на /api/auth/register необходимо
+                          возвращать статус 404 (NOT FOUND)."
+        - insert:
+            tableName: posts
+            columns:
+              - column:
+                  name: moderation_status
+                  value: "ACCEPTED"
+              - column:
+                  name: is_active
+                  value: 1
+              - column:
+                  name: user_id
+                  value: 1
+              - column:
+                  name: time
+                  value: '2021-05-12 23:15:05'
+              - column:
+                  name: title
+                  value: "title11"
+              - column:
+                  name: view_count
+                  value: 1
+              - column:
+                  name: text
+                  value: "POST_PREMODERATION - если включен этот режим, то все новые посты пользователей с moderation =
+                          false обязательно должны попадать на модерацию, у постов при создании должен быть установлен
+                          moderation_status = NEW. Eсли значения POST_PREMODERATION = false (режим премодерации
+                          выключен), то все новые посты должны сразу публиковаться (если у них установлен параметр active =
+                          1), у постов при создании должен быть установлен moderation_status = ACCEPTED."
+
+
+

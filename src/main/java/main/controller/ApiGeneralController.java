@@ -11,6 +11,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.security.Principal;
 
@@ -79,9 +80,10 @@ public class ApiGeneralController {
     @PostMapping(value = "/image", consumes = { "multipart/form-data" })
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> postImage(
-            @RequestParam("image") MultipartFile file
+            @RequestParam("image") MultipartFile file,
+            HttpServletRequest request
     ) throws IOException {
-        AddingNewResponse addingNewResponse = addImageService.addImage(file);
+        AddingNewResponse addingNewResponse = addImageService.addImage(file, request);
         if (addingNewResponse.isResult()) {
             return ResponseEntity.ok(addingNewResponse);
         }
@@ -123,10 +125,11 @@ public class ApiGeneralController {
     @PreAuthorize("hasAuthority('user:write')")
     public ResponseEntity<?> updateProfile(
             @ModelAttribute ProfileUpdateRequest profileUpdateRequest,
-            Principal principal
+            Principal principal,
+            HttpServletRequest request
             ) throws IOException {
 
-        return ResponseEntity.ok(apiProfileService.profileEdit(profileUpdateRequest, principal));
+        return ResponseEntity.ok(apiProfileService.profileEdit(profileUpdateRequest, principal, request));
     }
 
     @PostMapping(value = "/profile/my",
@@ -134,9 +137,10 @@ public class ApiGeneralController {
     )
     public ResponseEntity<?> updateProfile1(
             @RequestBody NoPhotoProfileUpdate noPhotoProfileUpdate,
-            Principal principal
+            Principal principal,
+            HttpServletRequest request
     ) throws IOException {
-        return ResponseEntity.ok(apiProfileService.profileEditWithoutPhoto(noPhotoProfileUpdate, principal));
+        return ResponseEntity.ok(apiProfileService.profileEditWithoutPhoto(noPhotoProfileUpdate, principal, request));
     }
 
 

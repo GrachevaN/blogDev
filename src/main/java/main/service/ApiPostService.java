@@ -187,12 +187,17 @@ public class ApiPostService {
 
         String[] args = theDate.split("-");
         Calendar calendar = Calendar.getInstance();
-        calendar.set(Integer.parseInt(args[0]), Integer.parseInt(args[1]), Integer.parseInt(args[2]));
-        Timestamp timestamp = new Timestamp(calendar.getTime().getTime());
+        calendar.set(Integer.parseInt(args[0]), Integer.parseInt(args[1])-1, Integer.parseInt(args[2]));
+        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+        calendar.setTimeInMillis(timestamp.getTime());
         calendar.set(Calendar.HOUR, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         Timestamp stopTimestamp = new Timestamp(calendar.getTime().getTime());
+        calendar.setTimeInMillis(stopTimestamp.getTime());
         List<Post> posts = postRepository.findPostByPostTimeContaining(pageable, timestamp, stopTimestamp, ModerationStatus.ACCEPTED).getContent();
         ApiPostResponse apiPostResponse = makePostResponse(posts);
 
@@ -388,6 +393,7 @@ public class ApiPostService {
                                      List<String> tags) {
 
         AddingNewResponse addingNewResponse = new AddingNewResponse();
+        addingNewResponse.setResult(true);
         Settings settings = settingsRepository.findByCode("POST_PREMODERATION");
         if (!authCheckService.getAuthUser(principal).equals(null)) {
             User user = authCheckService.getAuthUser(principal);

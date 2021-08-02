@@ -7,6 +7,7 @@ import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.imageio.ImageIO;
+import javax.servlet.http.HttpServletRequest;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.file.Files;
@@ -26,24 +27,25 @@ public class AddImageService {
     }
 
 
-    public AddingNewResponse addImage(MultipartFile newImage) throws IOException {
+    public AddingNewResponse addImage(MultipartFile newImage, HttpServletRequest request) throws IOException {
 
         AddingNewResponse addingNewResponse = new AddingNewResponse();
 
         String imageType = newImage.getOriginalFilename().substring(newImage.getOriginalFilename().lastIndexOf(".") + 1);
         if (imageType.equals("png") || imageType.equals("jpg")) {
             StringBuilder dir = new StringBuilder();
-//            dir.append("src/main/resources/upload");
-            dir.append("upload");
+            dir.append("/upload");
             for (int i = 0; i<3; i++) {
                 dir.append("/");
                 dir.append(authCheckService.generateCode(foldLenght));
             }
             Path theDir = Paths.get(dir.toString());
-            Files.createDirectories(theDir);
+            String uploadPath = theDir.toString() + "\\";
+            String realPath = request.getServletContext().getRealPath(uploadPath);
+            Files.createDirectories(Paths.get(realPath));
 
             try (InputStream in = newImage.getInputStream();
-                 OutputStream out = new FileOutputStream(theDir.toString() + "/" + newImage.getOriginalFilename()))
+            OutputStream out = new FileOutputStream(realPath + "\\" + newImage.getOriginalFilename()))
             {
                 FileCopyUtils.copy(in, out);
             }
@@ -53,7 +55,7 @@ public class AddImageService {
             }
 
             addingNewResponse.setResult(true);
-            addingNewResponse.setImageValue(theDir.toString() + "/" + newImage.getOriginalFilename());
+            addingNewResponse.setImageValue(theDir.toString() + "\\" + newImage.getOriginalFilename());
         }
         else {
             addingNewResponse.setResult(false);

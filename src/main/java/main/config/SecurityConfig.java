@@ -27,9 +27,6 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final UserDetailsServiceImpl userDetailsService;
 
     @Autowired
-    private LogoutSuccessHandler logoutSuccessHandler;
-
-    @Autowired
     public SecurityConfig(@Qualifier("userDetailsServiceImpl") UserDetailsServiceImpl userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
@@ -45,7 +42,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         .formLogin()
                 .loginPage("/login")
                 .failureUrl("/login")
-//                .disable()
+
                 .and()
         .httpBasic();
     }

@@ -88,7 +88,6 @@ public class AuthCheckService {
     }
 
 
-
     public AddingNewResponse passwordRestore(String email) {
         String subjectText = "Password restore";
         AddingNewResponse addingNewResponse = new AddingNewResponse();
@@ -135,7 +134,7 @@ public class AuthCheckService {
                 System.out.println(errorsDTO.getPassword());
             }
             if (addingNewResponse.isResult()) {
-                user.setPassword(authUserRequest.getPassword());
+                user.setPassword(passwordEncoder.encode(authUserRequest.getPassword()));
                 userRepository.save(user);
             }
         }
@@ -178,22 +177,26 @@ public class AuthCheckService {
     }
 
     public LoginResponse logUser(LoginRequest loginRequest) {
-        Authentication authentication = authenticationManager.
-                authenticate(
-                        new UsernamePasswordAuthenticationToken(
-                                loginRequest.getEmail(), loginRequest.getPassword()
-                        ));
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
-        LoginResponse loginResponse;
-        if (user != null) {
-            loginResponse = getLoginResponse(user.getUsername());
-        }
+        LoginResponse loginResponse = new LoginResponse();
+        org.springframework.security.core.userdetails.User user;
+            Authentication authentication = authenticationManager.
+                    authenticate(
+                            new UsernamePasswordAuthenticationToken(
+                                    loginRequest.getEmail(), loginRequest.getPassword()
+                            ));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+
+            if (user != null) {
+                loginResponse = getLoginResponse(user.getUsername());
+            }
+//        }
         else {
-            loginResponse = new LoginResponse();
+//            loginResponse = new LoginResponse();
             loginResponse.setResult(false);
         }
         return loginResponse;
+
     }
 
     private LoginResponse getLoginResponse(String email) {
