@@ -59,7 +59,7 @@ public class AuthCheckService {
     @Autowired
     public JavaMailSender emailSender;
 
-    @Autowired
+
     private final AuthenticationManager authenticationManager;
 
     public static int captchaWidth = 100;
@@ -67,6 +67,7 @@ public class AuthCheckService {
     public static int captchaLength = 6;
     public static int codeLength = 18;
 
+    @Autowired
     public AuthCheckService(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
     }
@@ -178,21 +179,19 @@ public class AuthCheckService {
 
     public LoginResponse logUser(LoginRequest loginRequest) {
         LoginResponse loginResponse = new LoginResponse();
-        org.springframework.security.core.userdetails.User user;
-            Authentication authentication = authenticationManager.
+
+        Authentication authentication = authenticationManager.
                     authenticate(
                             new UsernamePasswordAuthenticationToken(
                                     loginRequest.getEmail(), loginRequest.getPassword()
                             ));
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        org.springframework.security.core.userdetails.User user = (org.springframework.security.core.userdetails.User) authentication.getPrincipal();
 
-            if (user != null) {
-                loginResponse = getLoginResponse(user.getUsername());
-            }
-//        }
+        if (user != null) {
+            loginResponse = getLoginResponse(user.getUsername());
+        }
         else {
-//            loginResponse = new LoginResponse();
             loginResponse.setResult(false);
         }
         return loginResponse;
