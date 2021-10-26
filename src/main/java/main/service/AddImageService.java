@@ -2,6 +2,7 @@ package main.service;
 
 
 import main.api.response.AddingNewResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +21,9 @@ public class AddImageService {
     static int foldLenght = 3;
     private int imgSize = 36;
 
+//    @Value("${upload.path}")
+//    private String valUploadPath;
+
     private final AuthCheckService authCheckService;
 
     public AddImageService(AuthCheckService authCheckService) {
@@ -35,6 +39,7 @@ public class AddImageService {
         if (imageType.equals("png") || imageType.equals("jpg")) {
             StringBuilder dir = new StringBuilder();
             dir.append("/upload");
+//            dir.append(valUploadPath);
             for (int i = 0; i<3; i++) {
                 dir.append("/");
                 dir.append(authCheckService.generateCode(foldLenght));
@@ -44,8 +49,10 @@ public class AddImageService {
             String realPath = request.getServletContext().getRealPath(uploadPath);
             Files.createDirectories(Paths.get(realPath));
 
+//            Files.createDirectories(Paths.get(uploadPath));
             try (InputStream in = newImage.getInputStream();
             OutputStream out = new FileOutputStream(realPath + "\\" + newImage.getOriginalFilename()))
+//                 OutputStream out = new FileOutputStream(uploadPath + "\\" + newImage.getOriginalFilename()))
             {
                 FileCopyUtils.copy(in, out);
             }

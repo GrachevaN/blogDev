@@ -28,7 +28,7 @@ public class CommentDTO {
     }
 
     public void setTimestamp(long timestamp) {
-        this.timestamp = timestamp;
+        this.timestamp = timestamp/1000;
     }
 
     public UserDTO getUser() {

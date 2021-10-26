@@ -102,8 +102,8 @@ public class ApiPostService {
         Post post = postRepository.findById(id).orElseThrow(() -> new DocumentNotFoundExc());
         if (
                 (post.getStatus()==1)
-                && post.getModerationStatus().equals(ModerationStatus.ACCEPTED)
-                && post.getPostTime().before((calendar.getTime()))
+                        && post.getModerationStatus().equals(ModerationStatus.ACCEPTED)
+                        && post.getPostTime().before((calendar.getTime()))
         )
         {
             UserDTO user = new UserDTO(post.getUser().getId(), post.getUser().getName());
@@ -125,6 +125,7 @@ public class ApiPostService {
                 CommentDTO commentDTO = new CommentDTO();
                 commentDTO.setId(comment.getId());
                 commentDTO.setText(comment.getText());
+//                commentDTO.setTimestamp(comment.getCommentPostTime().getTime());
                 commentDTO.setTimestamp(comment.getCommentPostTime().getTime());
                 UserDTO userDTO = new UserDTO(comment.getUser().getId(), comment.getUser().getName());
                 userDTO.setPhoto(comment.getUser().getPhoto());
@@ -188,12 +189,12 @@ public class ApiPostService {
         String[] args = theDate.split("-");
         Calendar calendar = Calendar.getInstance();
         calendar.set(Integer.parseInt(args[0]), Integer.parseInt(args[1])-1, Integer.parseInt(args[2]));
-        calendar.set(Calendar.HOUR, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
         Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
         calendar.setTimeInMillis(timestamp.getTime());
-        calendar.set(Calendar.HOUR, 23);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
         calendar.set(Calendar.MINUTE, 59);
         calendar.set(Calendar.SECOND, 59);
         Timestamp stopTimestamp = new Timestamp(calendar.getTime().getTime());
@@ -334,12 +335,10 @@ public class ApiPostService {
             Post post = postRepository.findById(id).get();
             ErrorsDTO errorsDTO = new ErrorsDTO();
             if (newPostRequest.getTitle().isEmpty() || newPostRequest.getTitle().length() < titleLength) {
-                System.out.println("e1");
                 errorsDTO.setTitleError();
                 addingNewResponse.setResult(false);
             }
             if (newPostRequest.getText().length() < textLength) {
-                System.out.println("e2");
                 errorsDTO.setTextError();
                 addingNewResponse.setResult(false);
             }
@@ -426,11 +425,22 @@ public class ApiPostService {
 
                 if (!tags.isEmpty()) {
                     tags.forEach(s -> {
-                        Tag tag = tagsRepository.findByName(s).orElseThrow();
-                        Tag2Post tag2Post = new Tag2Post();
-                        tag2Post.setPost(post);
-                        tag2Post.setTag(tag);
-                        tag2PostRepository.save(tag2Post);
+                        if (!tags.contains(s)) {
+                            Optional<Tag> optionalTag = tagsRepository.findByName(s);
+                            Tag tag;
+                            if (!optionalTag.isPresent()) {
+                                tag = new Tag();
+                                tag.setName(s);
+                                tagsRepository.save(tag);
+                            }
+                            else {
+                                tag = optionalTag.get();
+                            }
+                            Tag2Post tag2Post = new Tag2Post();
+                            tag2Post.setPost(post);
+                            tag2Post.setTag(tag);
+                            tag2PostRepository.save(tag2Post);
+                        }
                     });
                 }
             }
@@ -447,10 +457,6 @@ public class ApiPostService {
     private ApiPostResponse makePostResponse (List<Post> posts) {
         ApiPostResponse apiPostResponse = new ApiPostResponse();
         Calendar calendar = Calendar.getInstance();
-//        posts = posts.stream().filter(x -> x.getStatus()==1
-//                && x.getModerationStatus().equals(ModerationStatus.ACCEPTED)
-//                && x.getPostTime().before((calendar.getTime())))
-//                .collect(Collectors.toList());
         posts.forEach(
                 post -> {
                     calendar.setTimeInMillis(post.getPostTime().getTime());
