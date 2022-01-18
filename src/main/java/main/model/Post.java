@@ -16,15 +16,14 @@ public class Post {
     @Column(name = "is_active", nullable = false)
     private byte status;
 
-    @Enumerated (EnumType.STRING)
+    @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "enum", nullable = false)
-//    @Column(nullable = false)
     private ModerationStatus moderationStatus = ModerationStatus.NEW;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     private User moderator;
 
-    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToOne(cascade = CascadeType.ALL)
     private User user;
 
     @Column(name = "time", nullable = false)

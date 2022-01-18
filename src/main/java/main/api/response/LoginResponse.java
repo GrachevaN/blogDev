@@ -22,8 +22,6 @@ public class LoginResponse {
         return user;
     }
 
-//    private UserLoginResponse;
-
     public void setUser(UserDTO user) {
         this.user = user;
     }
